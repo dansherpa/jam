@@ -81,7 +81,7 @@ mountainDataIndex = mountainIndex;
 // Clear position watch
 navigator.geolocation.clearWatch(watchPositionId);
 // Start watching location
-watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, { enableHighAccuracy: false, maximumAge: 60000, timeout: 30000 });
+watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, { enableHighAccuracy: true, maximumAge: 60000, timeout: 30000 });
 }
 function showClimberLocation(position) {
 // Hide/show appropriate elements
