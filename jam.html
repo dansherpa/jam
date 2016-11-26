@@ -30,6 +30,8 @@ var locationError = document.getElementById("Error");
 var resultsTitle = document.getElementById("TrackingTitle");
 var resultsContent = document.getElementById("TrackingResults");
 var googleMap = document.getElementById("GoogleMap");
+var addressUrl = "http://maps.googleapis.com/maps/api/geocode/json?latlng=";
+var xhr;
 // Create a two dimensional array for keeping our store data
 var mountainData = new Array(3)
 createTwoDimensionalArray(3);
@@ -91,8 +93,8 @@ resultsTitle.style.display = 'block';
 resultsContent.style.display = 'block';
 googleMap.style.display = 'block';
 // Determine current distance to mountain
-var currentDistance;
-currentDistance = calculateDistance(position.coords.latitude, position.coords.longitude, mountainData[mountainDataIndex][1], mountainData[mountainDataIndex][2]);
+//var currentDistance;
+//currentDistance = calculateDistance(position.coords.latitude, position.coords.longitude, mountainData[mountainDataIndex][1], mountainData[mountainDataIndex][2]);
 var timestampDate = new Date(position.timestamp);
 // Build results
 var geoloactionResults = '';
@@ -123,14 +125,45 @@ else {
 // Calculate and display results normally
 geoloactionResults = geoloactionResults + '&nbsp;Speed: ' + (position.coords.speed * 2.2369362920544) + ' (miles per hour)<br />';
 }
+
+// last updated
 geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate.toLocaleString();
+
 // Show results
 resultsContent.innerHTML = geoloactionResults;
-// Show map
+
 var googleLatitudeLongitude = position.coords.latitude + "," + position.coords.longitude;
+
+// Show address
+showAddress(googleLatitudeLongitude);
+
+// Show map
 var mapImageUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + googleLatitudeLongitude + "&zoom=12&size=300x300&sensor=false";
 googleMap.innerHTML = "<img src='" + mapImageUrl + "' />";
 }
+
+function showAddress(latlong) {
+    xhr = new XMLHttpRequest();
+    xhr.open('GET', addressUrl + latlong, true);
+    xhr.send();
+    xhr.addEventListener("readystatechange", processAddressRequest, false);
+}
+
+function processAddressRequest(e) {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+        var response = JSON.parse(xhr.responseText);
+        var formattedAddress;
+        if (response.results.length == 0) {
+            formattedAddress = "Address: unknown";
+        } else {
+            formattedAddress = "Address: " + response.results[0].formatted_address;
+        }
+        var div = document.createElement("div");
+        div.innerHTML = formattedAddress;
+        resultsContent.appendChild(div);
+    }
+}
+
 function calculateDistance(latitude1,longitude1,latitude2,longitude2) {
 // Calculate distance between mountain peak and current location
 // using the Haversine formula
