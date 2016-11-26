@@ -16,7 +16,7 @@ Press this button to find your current data:
 <em>We tried but we can't calculate your location.</em>
 </div>
 <div id="TrackingTitle">
-<h4>Tracking your Address, location, velocity, and heading...</h4>
+<h4>Tracking your address, location, velocity, and heading...</h4>
 </div>
 <div id="TrackingResults" style="padding-left:20px;">
 </div>
@@ -31,6 +31,7 @@ var resultsTitle = document.getElementById("TrackingTitle");
 var resultsContent = document.getElementById("TrackingResults");
 var googleMap = document.getElementById("GoogleMap");
 var addressUrl = "http://maps.googleapis.com/maps/api/geocode/json?latlng=";
+var myAddress = '';
 var xhr;
 // Create a two dimensional array for keeping our store data
 var mountainData = new Array(3)
@@ -129,6 +130,9 @@ geoloactionResults = geoloactionResults + '&nbsp;Speed: ' + (position.coords.spe
 // last updated
 geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate.toLocaleString();
 
+// ADDRESS PLACEHOLDER
+geoloactionResults = geoloactionResults + '<br/>&nbsp;' + myAddress;
+
 // Show results
 resultsContent.innerHTML = geoloactionResults;
 
@@ -156,13 +160,15 @@ function processAddressRequest(e) {
         var formattedAddress;
         if (response.results.length == 0) {
             formattedAddress = "Address: unknown";
+            myAddress = "Address: unknown";
         } else {
             formattedAddress = "Address: " + response.results[0].formatted_address;
+            myAddress = "Address: " + response.results[0].formatted_address;
         }
     }
-    var div = document.createElement("div");
-    div.innerHTML = formattedAddress;
-    resultsContent.appendChild(div);
+    //var div = document.createElement("div");
+    //div.innerHTML = formattedAddress;
+    //resultsContent.appendChild(div);
 }
 
 function calculateDistance(latitude1,longitude1,latitude2,longitude2) {
