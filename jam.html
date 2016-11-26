@@ -121,7 +121,7 @@ geoloactionResults = geoloactionResults + '&nbsp;Speed could not be determined.<
 }
 else {
 // Calculate and display results normally
-geoloactionResults = geoloactionResults + '&nbsp;Speed: ' + position.coords.speed + ' (meters per second)<br />';
+geoloactionResults = geoloactionResults + '&nbsp;Speed: ' + (position.coords.speed * 2.2369362920544) + ' (miles per hour)<br />';
 }
 geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate.toLocaleString();
 // Show results
