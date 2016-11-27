@@ -139,7 +139,7 @@ showAddress(googleLatitudeLongitude);
 setTimeout(geoloactionResults = geoloactionResults + '<br/>&nbsp;' + myAddress, 5000);
 
 // Version
-geoloactionResults = geoloactionResults + '<br/>&nbsp;' + 'v0.1002';
+geoloactionResults = geoloactionResults + '<br/>&nbsp;' + 'v0.1003';
 
 // Show results
 resultsContent.innerHTML = geoloactionResults;
@@ -151,9 +151,9 @@ googleMap.innerHTML = "<img src='" + mapImageUrl + "' />";
 
 function showAddress(latlong) {
     xhr = new XMLHttpRequest();
-    xhr.open('GET', addressUrl + latlong, true);
+    xhr.open('GET', addressUrl + latlong);
     xhr.send();
-    xhr.addEventListener("readystatechange", processAddressRequest, false);
+    xhr.addEventListener("readystatechange", processAddressRequest);
 }
 
 function processAddressRequest(e) {
