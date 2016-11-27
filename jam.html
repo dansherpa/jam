@@ -25,7 +25,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1027<br/>
+    <br/>v0.1028<br/>
 </div>
 
 <script type="text/javascript">
@@ -39,6 +39,7 @@ var googleMap = document.getElementById("GoogleMap");
 var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
 var myAddress = '';
 var added = 0;
+var currentSpeed = 0;
 var xhr;
 // Create a two dimensional array for keeping our store data
 var mountainData = new Array(3)
@@ -135,6 +136,7 @@ geoloactionResults = geoloactionResults + '&nbsp;Speed could not be determined.<
 else {
 // Calculate and display results normally
 geoloactionResults = geoloactionResults + '&nbsp;Speed: ' + (position.coords.speed * 2.2369362920544) + ' (miles per hour)<br />';
+currentSpeed = position.coords.speed * 2.2369362920544;
 }
 
 // last updated
@@ -187,10 +189,19 @@ function processAddressRequest(e) {
             }
         }
         var interstate = "Not on an Interstate";
-        if (roadname.match('Interstate')) {
-            interstate = "You are on an Interstate! Drive carefully...";
+        var advisory = "";
+        if (true || roadname.match('Interstate')) {
+            var speedLimit = 65;
+            interstate = "You are on an Interstate (well, not really maybe, but we're testing)! Drive carefully...";
+            
+            if (currentSpeed != 0 && currentSpeed < (speedlimit / 2.0)) {
+                // suggest new speed
+                advisory = "JAMITON detected: Suggested Speed: " + getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9);
+            } else {
+                advisory = "No JAMITON detected (not going slow enough)";
+            }
         }
-        addressContent.innerHTML = "Road: " + roadname + "</br>" + formattedAddress + "</br></br>" + interstate;
+        addressContent.innerHTML = "Road: " + roadname + "</br>" + formattedAddress + "</br></br>" + interstate + "</br></br>" + advisory;
     }
     // Show results
     //var div = document.createElement("div");
@@ -198,7 +209,13 @@ function processAddressRequest(e) {
     //resultsContent.appendChild(div);
 }
 
+// Returns a random number between min (inclusive) and max (exclusive)
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
 function calculateDistance(latitude1,longitude1,latitude2,longitude2) {
+
 // Calculate distance between mountain peak and current location
 // using the Haversine formula
 var earthRadius = 3961.3; // Radius of the earth in miles
