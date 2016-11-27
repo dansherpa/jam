@@ -25,7 +25,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1030<br/>
+    <br/>v0.1031<br/>
 </div>
 
 <script type="text/javascript">
@@ -196,7 +196,7 @@ function processAddressRequest(e) {
             
             if (currentSpeed != 0 && currentSpeed < (speedlimit / 2.0)) {
                 // suggest new speed
-                advisory = "JAMITON detected: Suggested Speed: " + getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9) + " miles per hour";
+                advisory = "JAMITON detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
                 var msg = new SpeechSynthesisUtterance(advisory);
                 window.speechSynthesis.speak(msg);
 
