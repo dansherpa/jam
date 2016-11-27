@@ -25,7 +25,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1012<br/>
+    <br/>v0.1013<br/>
 </div>
 
 <script type="text/javascript">
@@ -145,7 +145,7 @@ var googleLatitudeLongitude = position.coords.latitude + "," + position.coords.l
 setTimeout(showAddress(googleLatitudeLongitude), 5000);
 
 // ADDRESS PLACEHOLDER
-setTimeout(geoloactionResults = geoloactionResults + '<br/>&nbsp;' + myAddress, 5000);
+//setTimeout(geoloactionResults = geoloactionResults + '<br/>&nbsp;' + myAddress, 5000);
 
 // Show results
 resultsContent.innerHTML = geoloactionResults;
@@ -176,6 +176,7 @@ function processAddressRequest(e) {
             myAddress = "Address: " + response.results[0].formatted_address;
         }
         addressContent.innerHTML = formattedAddress;
+        window.alert("x: " + formattedAddress);
     }
     // Show results
     //var div = document.createElement("div");
