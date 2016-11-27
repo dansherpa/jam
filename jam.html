@@ -25,7 +25,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1016<br/>
+    <br/>v0.1017<br/>
 </div>
 
 <script type="text/javascript">
@@ -38,6 +38,7 @@ var addressContent = document.getElementById("AddressResults");
 var googleMap = document.getElementById("GoogleMap");
 var addressUrl = "http://maps.googleapis.com/maps/api/geocode/json?latlng=";
 var myAddress = '';
+var added = 0;
 var xhr;
 // Create a two dimensional array for keeping our store data
 var mountainData = new Array(3)
@@ -157,12 +158,15 @@ var mapImageUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + goog
 }
 
 function showAddress(latlong) {
-    xhr = new XMLHttpRequest();
-    xhr.open('GET', addressUrl + latlong);
-    xhr.send();
-    window.alert("about to add addEventListener");
-    xhr.addEventListener("readystatechange", processAddressRequest);
-    window.alert("added addEventListener");
+    if (added == 0) {
+        added = 1;
+        xhr = new XMLHttpRequest();
+        xhr.open('GET', addressUrl + latlong);
+        xhr.send();
+        window.alert("about to add addEventListener");
+        xhr.addEventListener("readystatechange", processAddressRequest);
+        window.alert("added addEventListener");
+    }
 }
 
 function processAddressRequest(e) {
