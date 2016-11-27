@@ -25,7 +25,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1021<br/>
+    <br/>v0.1022<br/>
 </div>
 
 <script type="text/javascript">
@@ -36,7 +36,7 @@ var resultsTitle = document.getElementById("TrackingTitle");
 var resultsContent = document.getElementById("TrackingResults");
 var addressContent = document.getElementById("AddressResults");
 var googleMap = document.getElementById("GoogleMap");
-var addressUrl = "http://maps.googleapis.com/maps/api/geocode/json?latlng=";
+var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
 var myAddress = '';
 var added = 0;
 var xhr;
@@ -66,7 +66,6 @@ mountainData[i] = new Array(arraySize);
 }
 // Function to determine if browser supports geolocation
 function checkGeolocationSupport() {
-    window.alert("testing...");
 if (navigator.geolocation) {
 // Show mountain selection options - radio buttons -
 // otherwise send to function that shows the specific reason why location cannot be determined
@@ -162,7 +161,7 @@ function showAddress(latlong) {
         added = 1;
         xhr = new XMLHttpRequest();
         window.alert("about to add addEventListener");
-        xhr.addEventListener("load", processAddressRequest);
+        xhr.addEventListener("readystatechange", processAddressRequest);
         window.alert("added addEventListener ");
         xhr.open('GET', addressUrl + latlong);
         xhr.send();
