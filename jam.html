@@ -30,7 +30,7 @@ var resultsTitle = document.getElementById("TrackingTitle");
 var resultsContent = document.getElementById("TrackingResults");
 var googleMap = document.getElementById("GoogleMap");
 var addressUrl = "http://maps.googleapis.com/maps/api/geocode/json?latlng=";
-var myAddress = myAddress + 'foo';
+var myAddress = '';
 var xhr;
 // Create a two dimensional array for keeping our store data
 var mountainData = new Array(3)
@@ -138,7 +138,7 @@ setTimeout(showAddress(googleLatitudeLongitude), 5000);
 setTimeout(geoloactionResults = geoloactionResults + '<br/>&nbsp;' + myAddress, 5000);
 
 // Version
-geoloactionResults = geoloactionResults + '<br/><br/>&nbsp;' + 'v0.1010';
+geoloactionResults = geoloactionResults + '<br/><br/>&nbsp;' + 'v0.1011';
 
 // Show results
 resultsContent.innerHTML = geoloactionResults;
