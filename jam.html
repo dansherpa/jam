@@ -10,6 +10,7 @@
 Press this button to find your current data:
 <div id="InputElementIndent" style="padding-left:10px;">
 <input type="button" onclick="startTracking(0)" value="Find Me!"/>
+<br/>High Accuracy:&nbsp<input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox"/>
 </div>
 </div>
 <div id="Error">
@@ -25,7 +26,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1031<br/>
+    <br/>v0.1032<br/>
 </div>
 
 <script type="text/javascript">
@@ -39,6 +40,7 @@ var googleMap = document.getElementById("GoogleMap");
 var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
 var myAddress = '';
 var added = 0;
+var highacc = false;
 var currentSpeed = 0;
 var xhr;
 // Create a two dimensional array for keeping our store data
@@ -94,9 +96,10 @@ mountainDataIndex = mountainIndex;
 // Clear position watch
 navigator.geolocation.clearWatch(watchPositionId);
 // Start watching location
-watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, { enableHighAccuracy: false, maximumAge: 0, timeout: 30000 });
+watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, { enableHighAccuracy: highacc, maximumAge: 0, timeout: 30000 });
 }
 function showClimberLocation(position) {
+highacc = document.getElementById('highaccuracyCheckbox').checked;
 // Hide/show appropriate elements
 InputElements.style.display = 'block';
 locationError.style.display = 'none';
@@ -141,6 +144,8 @@ currentSpeed = position.coords.speed * 2.2369362920544;
 
 // last updated
 geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate.toLocaleString();
+
+geoloactionResults = geoloactionResults + '<br/>&nbsp;High Accuracy: ' + highacc;
 
 var googleLatitudeLongitude = position.coords.latitude + "," + position.coords.longitude;
 
