@@ -139,7 +139,7 @@ showAddress(googleLatitudeLongitude);
 setTimeout(geoloactionResults = geoloactionResults + '<br/>&nbsp;' + myAddress, 5000);
 
 // Version
-geoloactionResults = geoloactionResults + '<br/>&nbsp;' + 'v0.1001';
+geoloactionResults = geoloactionResults + '<br/>&nbsp;' + 'v0.1002';
 
 // Show results
 resultsContent.innerHTML = geoloactionResults;
@@ -157,6 +157,7 @@ function showAddress(latlong) {
 }
 
 function processAddressRequest(e) {
+    myAddress = "Address: "
     formattedAddress = "Address: "
     if (xhr.readyState == 4 && xhr.status == 200) {
         var response = JSON.parse(xhr.responseText);
