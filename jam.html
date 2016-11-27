@@ -132,13 +132,13 @@ geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate
 var googleLatitudeLongitude = position.coords.latitude + "," + position.coords.longitude;
 
 // Show address
-showAddress(googleLatitudeLongitude);
+setTimeout(showAddress(googleLatitudeLongitude), 5000);
 
 // ADDRESS PLACEHOLDER
 setTimeout(geoloactionResults = geoloactionResults + '<br/>&nbsp;' + myAddress, 5000);
 
 // Version
-geoloactionResults = geoloactionResults + '<br/><br/>&nbsp;' + 'v0.1008';
+geoloactionResults = geoloactionResults + '<br/><br/>&nbsp;' + 'v0.1009';
 
 // Show results
 resultsContent.innerHTML = geoloactionResults;
