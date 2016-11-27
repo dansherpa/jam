@@ -160,7 +160,9 @@ function showAddress(latlong) {
     xhr = new XMLHttpRequest();
     xhr.open('GET', addressUrl + latlong);
     xhr.send();
+    window.alert("about to add addEventListener");
     xhr.addEventListener("readystatechange", processAddressRequest);
+    window.alert("added addEventListener");
 }
 
 function processAddressRequest(e) {
