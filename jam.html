@@ -25,7 +25,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1019<br/>
+    <br/>v0.1020<br/>
 </div>
 
 <script type="text/javascript">
@@ -164,8 +164,8 @@ function showAddress(latlong) {
         xhr.open('GET', addressUrl + latlong);
         xhr.send();
         window.alert("about to add addEventListener");
-        var listener = xhr.addEventListener("readystatechange", processAddressRequest);
-        window.alert("added addEventListener " + listener);
+        xhr.addEventListener("load", processAddressRequest);
+        window.alert("added addEventListener ");
     }
 }
 
