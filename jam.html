@@ -139,14 +139,14 @@ showAddress(googleLatitudeLongitude);
 setTimeout(geoloactionResults = geoloactionResults + '<br/>&nbsp;' + myAddress, 5000);
 
 // Version
-geoloactionResults = geoloactionResults + '<br/>&nbsp;' + 'v0.1003';
+geoloactionResults = geoloactionResults + '<br/>&nbsp;' + 'v0.1004';
 
 // Show results
 resultsContent.innerHTML = geoloactionResults;
 
 // Show map
 var mapImageUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + googleLatitudeLongitude + "&zoom=12&size=300x300&sensor=false";
-googleMap.innerHTML = "<img src='" + mapImageUrl + "' />";
+//googleMap.innerHTML = "<img src='" + mapImageUrl + "' />";
 }
 
 function showAddress(latlong) {
