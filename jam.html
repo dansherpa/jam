@@ -25,7 +25,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1017<br/>
+    <br/>v0.1018<br/>
 </div>
 
 <script type="text/javascript">
@@ -170,8 +170,8 @@ function showAddress(latlong) {
 }
 
 function processAddressRequest(e) {
-    myAddress = "Address: "
-    formattedAddress = "Address: "
+    myAddress = "Address: ";
+    formattedAddress = "Address: ";
     window.alert("readyState: " + xhr.readyState + ", status: " + xhr.status);
     if (xhr.readyState == 4 && xhr.status == 200) {
         window.alert("a: ");
