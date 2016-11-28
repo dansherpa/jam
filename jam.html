@@ -21,6 +21,21 @@
       <br />
       Verbalize Advice:&nbsp;
       <input class="verbalizeCheckbox" type="checkbox" value="1" name="verbalizeCheckbox" id="verbalizeCheckbox" checked="true" />
+      <br />
+      Polling Interval (seconds):&nbsp;
+      <input class="updateFrequencySlider" type="range" name="updateFrequencySlider" id="updateFrequencySlider" 
+        min="1" max="60" value="5"  oninput="sliderOutputUpdate(value)"
+        list="freqList">
+      <datalist id="freqList">
+        <option>1</option>
+        <option>10</option>
+        <option>20</option>
+        <option>30</option>
+        <option>40</option>
+        <option>50</option>
+        <option>60</option>
+      </datalist>
+      <output for="updateFrequencySlider" id="freqValue">5</output>
     </div>
   </div>
 
@@ -40,7 +55,7 @@
 
   <div id="Version" style="padding-left:20px;">
     <br />
-    v0.1036<br />
+    v0.1037<br />
   </div>
 
   <script type="text/javascript">
@@ -59,6 +74,7 @@
     var verbalize = true;
     var currentSpeed = 0;
     var lastAdvisory = '';
+    var lastUpdateTime = 0;
     var xhr;
     // Create a two dimensional array for keeping our store data
     var mountainData = new Array(3)
@@ -79,6 +95,11 @@
     mountainData[0][2] = "-106.4451599";
     mountainData[1][2] = "-82.26511";
     mountainData[2][2] = "-121.7604446";
+
+    function sliderOutputUpdate(vol) {
+      document.getElementById('freqValue').value = vol;
+    }
+
     // This function creates our two dimensional array
     function createTwoDimensionalArray(arraySize) {
         for (i = 0; i < mountainData.length; ++i)
@@ -121,6 +142,14 @@
     }
 
     function showClimberLocation(position) {
+        frequency = document.getElementById('updateFrequencySlider').value;
+        var now = new Date();
+        if(lastUpdateTime && now.getTime() - lastUpdateTime.getTime() > (frequency * 1000)){
+            console.log("Ignoring position update");
+            return;
+        }
+        lastUpdateTime = now;
+
         highacc = document.getElementById('highaccuracyCheckbox').checked;
         verbalize = document.getElementById('verbalizeCheckbox').checked;
         // Hide/show appropriate elements
@@ -221,7 +250,8 @@
 
                 if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
                     // suggest new speed
-                    advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
+                    //advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
+                    advisory = "Congestion detected: Maintain a distance of 4 car lengths behind the vehicle in front of you."
                     if (verbalize && (advisory != lastAdvisory)) {
                         lastAdvisory = advisory;
                         var msg = new SpeechSynthesisUtterance(advisory);
@@ -229,7 +259,7 @@
                     }
 
                 } else {
-                    advisory = "No congestion detected (not going slow enough)";
+                    advisory = "No congestion detected.";
                     if (verbalize && (advisory != lastAdvisory)) {
                         lastAdvisory = advisory;
                         var msg = new SpeechSynthesisUtterance(advisory);
