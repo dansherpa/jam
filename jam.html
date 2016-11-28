@@ -1,292 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Jam tracker</title>
+  <title>Jam tracker</title>
 </head>
+
 <body onload="checkGeolocationSupport()">
-<div id="ClimberTrackerHeader">
-<h3>Jam Tracker</h3>
-</div>
-<div id="MountainClimberTrackerInputElements">
-Press this button to find your current data:
-<div id="InputElementIndent" style="padding-left:10px;">
-<input type="button" onclick="startTracking(0)" value="Find Me!"/>
-<br/>High Accuracy:&nbsp<input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox"/>
-<br/>Verbalize Advice:&nbsp<input class="verbalizeCheckbox" type="checkbox" value="1" name="verbalizeCheckbox" id="verbalizeCheckbox" checked/>
-</div>
-</div>
-<div id="Error">
-<em>We tried but we can't calculate your location.</em>
-</div>
-<div id="TrackingTitle">
-<h4>Tracking your address, location, velocity, and heading..</h4>
-</div>
-<div id="TrackingResults" style="padding-left:20px;">
-</div>
-<div id="AddressResults" style="padding-left:20px;">
-</div>
-<div id="GoogleMap" style="padding-left:20px;">
-</div>
-<div id="Version" style="padding-left:20px;">
-    <br/>v0.1034<br/>
-</div>
+  <div id="ClimberTrackerHeader">
+    <h3>Jam Tracker</h3>
+  </div>
 
-<script type="text/javascript">
-// Elements that we will need to manipulate
-var InputElements = document.getElementById("MountainClimberTrackerInputElements");
-var locationError = document.getElementById("Error");
-var resultsTitle = document.getElementById("TrackingTitle");
-var resultsContent = document.getElementById("TrackingResults");
-var addressContent = document.getElementById("AddressResults");
-var googleMap = document.getElementById("GoogleMap");
-var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
-var myAddress = '';
-var added = 0;
-var highacc = false;
-var verbalize = true;
-var currentSpeed = 0;
-var lastAdvisory = '';
-var xhr;
-// Create a two dimensional array for keeping our store data
-var mountainData = new Array(3)
-createTwoDimensionalArray(3);
-// Variable to track the selected mountain index in our array
-var mountainDataIndex = 0;
-// Variable to track position watch ID
-var watchPositionId = 0;
-// Mountain information
-mountainData[0][0] = "Mount Elbert, Colorado";
-mountainData[1][0] = "Mount Mitchell, North Carolina";
-mountainData[2][0] = "Mount Rainier, Washington";
-// Mountain latitude
-mountainData[0][1] = "39.1178512";
-mountainData[1][1] = "35.7649612";
-mountainData[2][1] = "46.8529129";
-// Mountain longitude
-mountainData[0][2] = "-106.4451599";
-mountainData[1][2] = "-82.26511";
-mountainData[2][2] = "-121.7604446";
-// This function creates our two dimensional array
-function createTwoDimensionalArray(arraySize) {
-for (i = 0; i < mountainData.length; ++i)
-mountainData[i] = new Array(arraySize);
-}
-// Function to determine if browser supports geolocation
-function checkGeolocationSupport() {
-if (navigator.geolocation) {
-// Show mountain selection options - radio buttons -
-// otherwise send to function that shows the specific reason why location cannot be determined
-InputElements.style.display = 'block';
-locationError.style.display = 'none';
-resultsTitle.style.display = 'none';
-resultsContent.style.display = 'none';
-addressContent.style.display = 'none';
-googleMap.style.display = 'none';
-}
-else {
-// Browser does not support geolocation
-InputElements.style.display = 'none';
-locationError.style.display = 'block';
-locationError.innerHTML = '<em>We cannot show your location because your browser does not support HTML 5 geolocation.</em>';
-resultsTitle.style.display = 'none';
-resultsContent.style.display = 'none';
-addressContent.style.display = 'none';
-googleMap.style.display = 'none';
-}
-}
-function startTracking(mountainIndex) {
-// Set index tracking variable to selected mountain data array index
-mountainDataIndex = mountainIndex;
-// Clear position watch
-navigator.geolocation.clearWatch(watchPositionId);
-// Start watching location
-watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, { enableHighAccuracy: highacc, maximumAge: 0, timeout: 30000 });
-}
-function showClimberLocation(position) {
-highacc = document.getElementById('highaccuracyCheckbox').checked;
-verbalize = document.getElementById('verbalizeCheckbox').checked;
-// Hide/show appropriate elements
-InputElements.style.display = 'block';
-locationError.style.display = 'none';
-resultsTitle.style.display = 'block';
-resultsContent.style.display = 'block';
-addressContent.style.display = 'block';
-googleMap.style.display = 'block';
-// Determine current distance to mountain
-//var currentDistance;
-//currentDistance = calculateDistance(position.coords.latitude, position.coords.longitude, mountainData[mountainDataIndex][1], mountainData[mountainDataIndex][2]);
-var timestampDate = new Date(position.timestamp);
-// Build results
-var geoloactionResults = '';
-geoloactionResults = '&nbsp;Position (latitude, longitude): ' + position.coords.latitude + ', ' + position.coords.longitude + '<br />';
-geoloactionResults = geoloactionResults + '&nbsp;(position accurate to within ' + Math.round(convertMetersToFeet(position.coords.accuracy)) + ' feet)<br />';
-if ((position.coords.altitude == null) || ((position.coords.altitude == 0) && (position.coords.altitudeAccuracy == 0))) {
-// Altitude cannot be determined -- generate appropriate message
-geoloactionResults = geoloactionResults + '&nbsp;Altitude could not be determined.<br />';
-}
-else {
-// Calculate and display results normally
-geoloactionResults = geoloactionResults + '&nbsp;Current Altitude: ' + position.coords.altitude + '<br />';
-geoloactionResults = geoloactionResults + '&nbsp;(altitude accurate to within ' + Math.round(convertMetersToFeet(position.coords.altitudeAccuracy)) + ' feet)<br />';
-}
-if ((position.coords.heading == null) || (isNaN(position.coords.heading))) {
-// Heading cannot be determined -- generate appropriate message
-geoloactionResults = geoloactionResults + '&nbsp;Heading could not be determined.<br />';
-}
-else {
-// Calculate and display results normally
-geoloactionResults = geoloactionResults + '&nbsp;Heading: ' + position.coords.heading + ' (360 degree heading with North being 0)<br />';
-}
-if ((position.coords.speed == null) || (isNaN(position.coords.speed))) {
-// Heading cannot be determined -- generate appropriate message
-geoloactionResults = geoloactionResults + '&nbsp;Speed could not be determined.<br />';
-}
-else {
-// Calculate and display results normally
-geoloactionResults = geoloactionResults + '&nbsp;Speed: ' + (position.coords.speed * 2.2369362920544) + ' (miles per hour)<br />';
-currentSpeed = position.coords.speed * 2.2369362920544;
-}
+  <div id="MountainClimberTrackerInputElements">
+    Press this button to find your current data:
 
-// last updated
-geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate.toLocaleString();
+    <div id="InputElementIndent" style="padding-left:10px;">
+      <input type="button" onclick="startTracking(0)" value="Find Me!" /><br />
+      High Accuracy:&nbsp;
+      <input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox" />
+      <br />
+      Verbalize Advice:&nbsp;
+      <input class="verbalizeCheckbox" type="checkbox" value="1" name="verbalizeCheckbox" id="verbalizeCheckbox" checked="true" />
+    </div>
+  </div>
 
-geoloactionResults = geoloactionResults + '<br/>&nbsp;High Accuracy: ' + highacc;
+  <div id="Error">
+    <em>We tried but we can't calculate your location.</em>
+  </div>
 
-var googleLatitudeLongitude = position.coords.latitude + "," + position.coords.longitude;
+  <div id="TrackingTitle">
+    <h4>Tracking your address, location, velocity, and heading..</h4>
+  </div>
 
-// Show address
-showAddress(googleLatitudeLongitude);
+  <div id="TrackingResults" style="padding-left:20px;"></div>
 
-// Show results
-resultsContent.innerHTML = geoloactionResults;
+  <div id="AddressResults" style="padding-left:20px;"></div>
 
-// Show map
-var mapImageUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + googleLatitudeLongitude + "&zoom=12&size=300x300&sensor=false";
-//googleMap.innerHTML = "<img src='" + mapImageUrl + "' />";
-}
+  <div id="GoogleMap" style="padding-left:20px;"></div>
 
-function showAddress(latlong) {
-    if (added == 0) {
-        added = 1;
-        xhr = new XMLHttpRequest();
-        xhr.addEventListener("readystatechange", processAddressRequest);
-        xhr.open('GET', addressUrl + latlong);
-        xhr.send();
-    } else {
-        xhr.open('GET', addressUrl + latlong);
-        xhr.send();
+  <div id="Version" style="padding-left:20px;">
+    <br />
+    v0.1035<br />
+  </div>
+
+  <script type="text/javascript">
+/* <![CDATA[ */
+    // Elements that we will need to manipulate
+    var InputElements = document.getElementById("MountainClimberTrackerInputElements");
+    var locationError = document.getElementById("Error");
+    var resultsTitle = document.getElementById("TrackingTitle");
+    var resultsContent = document.getElementById("TrackingResults");
+    var addressContent = document.getElementById("AddressResults");
+    var googleMap = document.getElementById("GoogleMap");
+    var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
+    var myAddress = '';
+    var added = 0;
+    var highacc = false;
+    var verbalize = true;
+    var currentSpeed = 0;
+    var lastAdvisory = '';
+    var xhr;
+    // Create a two dimensional array for keeping our store data
+    var mountainData = new Array(3)
+    createTwoDimensionalArray(3);
+    // Variable to track the selected mountain index in our array
+    var mountainDataIndex = 0;
+    // Variable to track position watch ID
+    var watchPositionId = 0;
+    // Mountain information
+    mountainData[0][0] = "Mount Elbert, Colorado";
+    mountainData[1][0] = "Mount Mitchell, North Carolina";
+    mountainData[2][0] = "Mount Rainier, Washington";
+    // Mountain latitude
+    mountainData[0][1] = "39.1178512";
+    mountainData[1][1] = "35.7649612";
+    mountainData[2][1] = "46.8529129";
+    // Mountain longitude
+    mountainData[0][2] = "-106.4451599";
+    mountainData[1][2] = "-82.26511";
+    mountainData[2][2] = "-121.7604446";
+    // This function creates our two dimensional array
+    function createTwoDimensionalArray(arraySize) {
+        for (i = 0; i < mountainData.length; ++i)
+            mountainData[i] = new Array(arraySize);
     }
-}
-
-function processAddressRequest(e) {
-    myAddress = "Address: ";
-    formattedAddress = "Address: ";
-    if (xhr.readyState == 4 && xhr.status == 200) {
-        var response = JSON.parse(xhr.responseText);
-        var formattedAddress;
-        var roadname = '';
-        if (response.results.length == 0) {
-            formattedAddress = "Address: unknown";
-            myAddress = "Address: unknown";
+    // Function to determine if browser supports geolocation
+    function checkGeolocationSupport() {
+        if (navigator.geolocation) {
+            // Show mountain selection options - radio buttons -
+            // otherwise send to function that shows the specific reason why location cannot be determined
+            InputElements.style.display = 'block';
+            locationError.style.display = 'none';
+            resultsTitle.style.display = 'none';
+            resultsContent.style.display = 'none';
+            addressContent.style.display = 'none';
+            googleMap.style.display = 'none';
         } else {
-            formattedAddress = "Address: " + response.results[0].formatted_address;
-            myAddress = "Address: " + response.results[0].formatted_address;
-            for (i = 0; i < response.results[0].address_components.length; ++i) {
-                if (response.results[0].address_components[i].types[0] == "route") {
-                    roadname = response.results[0].address_components[i].long_name;
-                    break;
-                }
-            }
+            // Browser does not support geolocation
+            InputElements.style.display = 'none';
+            locationError.style.display = 'block';
+            locationError.innerHTML = '<em>We cannot show your location because your browser does not support HTML 5 geolocation.<\/em>';
+            resultsTitle.style.display = 'none';
+            resultsContent.style.display = 'none';
+            addressContent.style.display = 'none';
+            googleMap.style.display = 'none';
         }
-        var interstate = "Not on an Interstate";
-        var advisory = "";
-        if (true || roadname.match('Interstate')) {
-            var speedLimit = 65;
-            interstate = "You are on an Interstate (well, not really maybe, but we're testing)! Drive carefully...";
-            
-            if (currentSpeed != 0 && currentSpeed < (speedlimit / 2.0)) {
-                // suggest new speed
-                advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
-                if (verbalize && (advisory != lastAdvisory)) {
-                    lastAdvisory = advisory;
-                    var msg = new SpeechSynthesisUtterance(advisory);
-                    window.speechSynthesis.speak(msg);
-                }
-
-            } else {
-                advisory = "No congestion detected (not going slow enough)";
-                if (verbalize && (advisory != lastAdvisory)) {
-                    lastAdvisory = advisory;
-                    var msg = new SpeechSynthesisUtterance(advisory);
-                    window.speechSynthesis.speak(msg);
-                }
-            }
-        }
-        addressContent.innerHTML = "Road: " + roadname + "</br>" + formattedAddress + "</br></br>" + interstate + "</br></br>" + advisory;
     }
-    // Show results
-    //var div = document.createElement("div");
-    //div.innerHTML = formattedAddress;
-    //resultsContent.appendChild(div);
-}
 
-// Returns a random number between min (inclusive) and max (exclusive)
-function getRandomArbitrary(min, max) {
-    return Math.random() * (max - min) + min;
-}
+    function startTracking(mountainIndex) {
+        // Set index tracking variable to selected mountain data array index
+        mountainDataIndex = mountainIndex;
+        // Clear position watch
+        navigator.geolocation.clearWatch(watchPositionId);
+        // Start watching location
+        watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, {
+            enableHighAccuracy: highacc,
+            maximumAge: 0,
+            timeout: 30000
+        });
+    }
 
-function calculateDistance(latitude1,longitude1,latitude2,longitude2) {
+    function showClimberLocation(position) {
+        highacc = document.getElementById('highaccuracyCheckbox').checked;
+        verbalize = document.getElementById('verbalizeCheckbox').checked;
+        // Hide/show appropriate elements
+        InputElements.style.display = 'block';
+        locationError.style.display = 'none';
+        resultsTitle.style.display = 'block';
+        resultsContent.style.display = 'block';
+        addressContent.style.display = 'block';
+        googleMap.style.display = 'block';
+        // Determine current distance to mountain
+        //var currentDistance;
+        //currentDistance = calculateDistance(position.coords.latitude, position.coords.longitude, mountainData[mountainDataIndex][1], mountainData[mountainDataIndex][2]);
+        var timestampDate = new Date(position.timestamp);
+        // Build results
+        var geoloactionResults = '';
+        geoloactionResults = '&nbsp;Position (latitude, longitude): ' + position.coords.latitude + ', ' + position.coords.longitude + '<br />';
+        geoloactionResults = geoloactionResults + '&nbsp;(position accurate to within ' + Math.round(convertMetersToFeet(position.coords.accuracy)) + ' feet)<br />';
+        if ((position.coords.altitude == null) || ((position.coords.altitude == 0) && (position.coords.altitudeAccuracy == 0))) {
+            // Altitude cannot be determined -- generate appropriate message
+            geoloactionResults = geoloactionResults + '&nbsp;Altitude could not be determined.<br />';
+        } else {
+            // Calculate and display results normally
+            geoloactionResults = geoloactionResults + '&nbsp;Current Altitude: ' + position.coords.altitude + '<br />';
+            geoloactionResults = geoloactionResults + '&nbsp;(altitude accurate to within ' + Math.round(convertMetersToFeet(position.coords.altitudeAccuracy)) + ' feet)<br />';
+        }
+        if ((position.coords.heading == null) || (isNaN(position.coords.heading))) {
+            // Heading cannot be determined -- generate appropriate message
+            geoloactionResults = geoloactionResults + '&nbsp;Heading could not be determined.<br />';
+        } else {
+            // Calculate and display results normally
+            geoloactionResults = geoloactionResults + '&nbsp;Heading: ' + position.coords.heading + ' (360 degree heading with North being 0)<br />';
+        }
+        if ((position.coords.speed == null) || (isNaN(position.coords.speed))) {
+            // Heading cannot be determined -- generate appropriate message
+            geoloactionResults = geoloactionResults + '&nbsp;Speed could not be determined.<br />';
+        } else {
+            // Calculate and display results normally
+            geoloactionResults = geoloactionResults + '&nbsp;Speed: ' + (position.coords.speed * 2.2369362920544) + ' (miles per hour)<br />';
+            currentSpeed = position.coords.speed * 2.2369362920544;
+        }
 
-// Calculate distance between mountain peak and current location
-// using the Haversine formula
-var earthRadius = 3961.3; // Radius of the earth in miles
-var dLatitude = convertToRadian(latitude2 - latitude1);
-var dLongitude = convertToRadian(longitude2 - longitude1);
-var a = Math.sin(dLatitude / 2) * Math.sin(dLatitude / 2) + Math.cos(convertToRadian(latitude1)) * Math.cos(convertToRadian(latitude2)) * Math.sin(dLongitude / 2) * Math.sin(dLongitude / 2);
-var greatCircleDistance = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-var distance = earthRadius * greatCircleDistance; // distance converted to miles from radians
-return distance;
-}
-function convertMetersToFeet(meters) {
-// Convert meters to feet and return result
-var feet;
-feet = meters * 3.2808399;
-return feet;
-}
-function convertMetersPerSecondToMilesPerHour(mps) {
-// Convert meters per second to miles per hour
-var mph;
-feet = mph * 2.2369362920544;
-return mph;
-}
-// Function to convert degrees to radians
-function convertToRadian(numericDegree) {
-return numericDegree * Math.PI / 180;
-}
-// Handle all error messages and display appropriate elements
-function showError(error) {
-// Hide/show appropriate elements
-InputElements.style.display = 'none';
-locationError.style.display = 'block';
-resultsTitle.style.display = 'none';
-resultsContent.style.display = 'none';
-addressContent.style.display = 'none';
-googleMap.style.display = 'none';
-// Determine appropriate eeror message
-switch (error.code) {
-case error.PERMISSION_DENIED:
-locationError.innerHTML = "We tried but we can't calculate your location because you denied the request for Geolocation."
-break;
-case error.POSITION_UNAVAILABLE:
-locationError.innerHTML = "We tried but we can't calculate your location because the location information is unavailable."
-break;
-case error.TIMEOUT:
-locationError.innerHTML = "We tried but we can't calculate your location because the request to get your location timed out."
-break;
-case error.UNKNOWN_ERROR:
-locationError.innerHTML = "We tried but we can't calculate your location because an unknown error occurred."
-break;
-}
-}
-</script>
+        // last updated
+        geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate.toLocaleString();
+
+        geoloactionResults = geoloactionResults + '<br/>&nbsp;High Accuracy: ' + highacc;
+
+        var googleLatitudeLongitude = position.coords.latitude + "," + position.coords.longitude;
+
+        // Show address
+        showAddress(googleLatitudeLongitude);
+
+        // Show results
+        resultsContent.innerHTML = geoloactionResults;
+
+        // Show map
+        var mapImageUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + googleLatitudeLongitude + "&zoom=12&size=300x300&sensor=false";
+        //googleMap.innerHTML = "<img src='" + mapImageUrl + "' />";
+    }
+
+    function showAddress(latlong) {
+        if (added == 0) {
+            added = 1;
+            xhr = new XMLHttpRequest();
+            xhr.addEventListener("readystatechange", processAddressRequest);
+            xhr.open('GET', addressUrl + latlong);
+            xhr.send();
+        } else {
+            xhr.open('GET', addressUrl + latlong);
+            xhr.send();
+        }
+    }
+
+    function processAddressRequest(e) {
+        myAddress = "Address: ";
+        formattedAddress = "Address: ";
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            var response = JSON.parse(xhr.responseText);
+            var formattedAddress;
+            var roadname = '';
+            if (response.results.length == 0) {
+                formattedAddress = "Address: unknown";
+                myAddress = "Address: unknown";
+            } else {
+                formattedAddress = "Address: " + response.results[0].formatted_address;
+                myAddress = "Address: " + response.results[0].formatted_address;
+                for (i = 0; i < response.results[0].address_components.length; ++i) {
+                    if (response.results[0].address_components[i].types[0] == "route") {
+                        roadname = response.results[0].address_components[i].long_name;
+                        break;
+                    }
+                }
+            }
+            var interstate = "Not on an Interstate";
+            var advisory = "";
+            if (true || roadname.match('Interstate')) {
+                var speedLimit = 65;
+                interstate = "You are on an Interstate (well, not really maybe, but we're testing)! Drive carefully...";
+
+                if (currentSpeed != 0 && currentSpeed < (speedlimit / 2.0)) {
+                    // suggest new speed
+                    advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
+                    if (verbalize && (advisory != lastAdvisory)) {
+                        lastAdvisory = advisory;
+                        var msg = new SpeechSynthesisUtterance(advisory);
+                        window.speechSynthesis.speak(msg);
+                    }
+
+                } else {
+                    advisory = "No congestion detected (not going slow enough)";
+                    if (verbalize && (advisory != lastAdvisory)) {
+                        lastAdvisory = advisory;
+                        var msg = new SpeechSynthesisUtterance(advisory);
+                        window.speechSynthesis.speak(msg);
+                    }
+                }
+            }
+            addressContent.innerHTML = "Road: " + roadname + "<\/br>" + formattedAddress + "<\/br><\/br>" + interstate + "<\/br><\/br>" + advisory;
+        }
+    }
+
+    // Returns a random number between min (inclusive) and max (exclusive)
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function calculateDistance(latitude1, longitude1, latitude2, longitude2) {
+
+        // Calculate distance between mountain peak and current location
+        // using the Haversine formula
+        var earthRadius = 3961.3; // Radius of the earth in miles
+        var dLatitude = convertToRadian(latitude2 - latitude1);
+        var dLongitude = convertToRadian(longitude2 - longitude1);
+        var a = Math.sin(dLatitude / 2) * Math.sin(dLatitude / 2) + Math.cos(convertToRadian(latitude1)) * Math.cos(convertToRadian(latitude2)) * Math.sin(dLongitude / 2) * Math.sin(dLongitude / 2);
+        var greatCircleDistance = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var distance = earthRadius * greatCircleDistance; // distance converted to miles from radians
+        return distance;
+    }
+
+    function convertMetersToFeet(meters) {
+        // Convert meters to feet and return result
+        var feet;
+        feet = meters * 3.2808399;
+        return feet;
+    }
+
+    function convertMetersPerSecondToMilesPerHour(mps) {
+        // Convert meters per second to miles per hour
+        var mph;
+        feet = mph * 2.2369362920544;
+        return mph;
+    }
+    // Function to convert degrees to radians
+    function convertToRadian(numericDegree) {
+        return numericDegree * Math.PI / 180;
+    }
+    // Handle all error messages and display appropriate elements
+    function showError(error) {
+        // Hide/show appropriate elements
+        InputElements.style.display = 'none';
+        locationError.style.display = 'block';
+        resultsTitle.style.display = 'none';
+        resultsContent.style.display = 'none';
+        addressContent.style.display = 'none';
+        googleMap.style.display = 'none';
+        // Determine appropriate eeror message
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                locationError.innerHTML = "We tried but we can't calculate your location because you denied the request for Geolocation."
+                break;
+            case error.POSITION_UNAVAILABLE:
+                locationError.innerHTML = "We tried but we can't calculate your location because the location information is unavailable."
+                break;
+            case error.TIMEOUT:
+                locationError.innerHTML = "We tried but we can't calculate your location because the request to get your location timed out."
+                break;
+            case error.UNKNOWN_ERROR:
+                locationError.innerHTML = "We tried but we can't calculate your location because an unknown error occurred."
+                break;
+        }
+    }
+/* ]]> */
+  </script>
 </body>
 </html>
