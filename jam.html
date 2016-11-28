@@ -3,6 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+  <link rel="stylesheet" type="text/css" href="jam.css">
   <title>Jam tracker</title>
 </head>
 
@@ -37,27 +38,38 @@
       </datalist>
       <output for="updateFrequencySlider" id="freqValue">5</output>
     </div>
+
+    <div id="Error">
+      <em>We tried but we can't calculate your location.</em>
+    </div>
+
+    <div id="TrackingTitle">
+      <h4>Tracking your address, location, velocity, and heading..</h4>
+    </div>
+
+    <div id="TrackingResults" style="padding-left:20px;"></div>
+
+    <div id="AddressResults" style="padding-left:20px;"></div>
+
+    <div id="GoogleMap" style="padding-left:20px;"></div>
+
   </div>
 
-  <div id="Error">
-    <em>We tried but we can't calculate your location.</em>
+  <div id="BigDisplay">
+    <div id="scoreboard">
+      <div id="speedDiv">
+        <span class="speed"></span>
+        <div class="smalltext">Your Speed (mph)</div>
+      </div>
+      <div id="carLengthsDiv">
+        <span class="carlengths"></span>
+        <div class="smalltext">Car Lengths</div>
+      </div>
+    </div>
   </div>
 
-  <div id="TrackingTitle">
-    <h4>Tracking your address, location, velocity, and heading..</h4>
-  </div>
-
-  <div id="TrackingResults" style="padding-left:20px;"></div>
-
-  <div id="AddressResults" style="padding-left:20px;"></div>
-
-  <div id="GoogleMap" style="padding-left:20px;"></div>
-
-  <div id="Version" style="padding-left:20px;">
-    <br />
-    v0.1038<br />
-  </div>
-
+  <br />
+  <div class="smallertext">v.1039</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
@@ -67,6 +79,12 @@
     var resultsContent = document.getElementById("TrackingResults");
     var addressContent = document.getElementById("AddressResults");
     var googleMap = document.getElementById("GoogleMap");
+    var bigDisplay = document.getElementById("BigDisplay");
+    var scoreboard = document.getElementById("scoreboard");
+    var speedDiv = document.getElementById("speedDiv");
+    var carLengthsDiv = document.getElementById("carLengthsDiv");
+    var speedSpan = scoreboard.querySelector('.speed');
+    var carLengthsSpan = scoreboard.querySelector('.carlengths');
     var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
     var myAddress = '';
     var added = 0;
@@ -110,25 +128,29 @@
         if (navigator.geolocation) {
             // Show mountain selection options - radio buttons -
             // otherwise send to function that shows the specific reason why location cannot be determined
-            InputElements.style.display = 'block';
+            //InputElements.style.display = 'block';
             locationError.style.display = 'none';
             resultsTitle.style.display = 'none';
             resultsContent.style.display = 'none';
             addressContent.style.display = 'none';
             googleMap.style.display = 'none';
+            bigDisplay.style.display = 'none';
         } else {
             // Browser does not support geolocation
-            InputElements.style.display = 'none';
+            //InputElements.style.display = 'none';
             locationError.style.display = 'block';
             locationError.innerHTML = '<em>We cannot show your location because your browser does not support HTML 5 geolocation.<\/em>';
             resultsTitle.style.display = 'none';
             resultsContent.style.display = 'none';
             addressContent.style.display = 'none';
             googleMap.style.display = 'none';
+            bigDisplay.style.display = 'none';
         }
     }
 
     function startTracking(mountainIndex) {
+        carLengthsSpan.style.display = 'none';
+        carLengthsDiv.style.display = 'none';
         // Set index tracking variable to selected mountain data array index
         mountainDataIndex = mountainIndex;
         // Clear position watch
@@ -139,6 +161,8 @@
             maximumAge: 0,
             timeout: 30000
         });
+        InputElements.style.display = 'none';
+        bigDisplay.style.display = 'block';
     }
 
     function showClimberLocation(position) {
@@ -153,7 +177,7 @@
         highacc = document.getElementById('highaccuracyCheckbox').checked;
         verbalize = document.getElementById('verbalizeCheckbox').checked;
         // Hide/show appropriate elements
-        InputElements.style.display = 'block';
+        //InputElements.style.display = 'block';
         locationError.style.display = 'none';
         resultsTitle.style.display = 'block';
         resultsContent.style.display = 'block';
@@ -195,6 +219,8 @@
         geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate.toLocaleString();
 
         geoloactionResults = geoloactionResults + '<br/>&nbsp;High Accuracy: ' + highacc;
+
+        geoloactionResults = geoloactionResults + '<br/>&nbsp;Interval: ' + frequency + " second(s)";
 
         var googleLatitudeLongitude = position.coords.latitude + "," + position.coords.longitude;
 
@@ -248,24 +274,39 @@
                 var speedLimit = 65;
                 interstate = "You are on an Interstate (well, not really maybe, but we're testing)! Drive carefully...";
 
+                speedSpan.innerHTML = Math.round(currentSpeed);
                 if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
+                    // turn red
                     // suggest new speed
                     //advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
-                    advisory = "Congestion detected: Maintain a distance of 4 car lengths behind the vehicle in front of you."
+                    advisory = "Congestion detected: Maintain a distance of 3 car lengths behind the vehicle in front of you."
                     if (verbalize && (advisory != lastAdvisory)) {
+                        document.body.style.backgroundColor = "red";
+                        carLengthsSpan.style.display = 'block';
+                        carLengthsDiv.style.display = 'block';
+                        carLengthsSpan.innerHTML = '3';
                         lastAdvisory = advisory;
                         var msg = new SpeechSynthesisUtterance(advisory);
                         window.speechSynthesis.speak(msg);
                     }
 
                 } else {
-                    advisory = "No congestion detected.";
+                    // turn green
+                    document.body.style.backgroundColor = "green";
+                    carLengthsSpan.style.display = 'none';
+                    carLengthsDiv.style.display = 'none';
+                    carLengthsSpan.innerHTML = '';
+                    advisory = "No congestion detected: Do not exceed the speed limit to ensure you don't cause congestion.";
                     if (verbalize && (advisory != lastAdvisory)) {
                         lastAdvisory = advisory;
                         var msg = new SpeechSynthesisUtterance(advisory);
                         window.speechSynthesis.speak(msg);
                     }
                 }
+            } else {
+              document.body.style.backgroundColor = "green";
+              carLengthsSpan.style.display = 'none';
+              carLengthsDiv.style.display = 'none';
             }
             addressContent.innerHTML = "Road: " + roadname + "<\/br>" + formattedAddress + "<\/br><\/br>" + interstate + "<\/br><\/br>" + advisory;
         }
@@ -315,6 +356,7 @@
         resultsContent.style.display = 'none';
         addressContent.style.display = 'none';
         googleMap.style.display = 'none';
+        bigDisplay.style.display = 'none';
         // Determine appropriate eeror message
         switch (error.code) {
             case error.PERMISSION_DENIED:
