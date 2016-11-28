@@ -11,6 +11,7 @@ Press this button to find your current data:
 <div id="InputElementIndent" style="padding-left:10px;">
 <input type="button" onclick="startTracking(0)" value="Find Me!"/>
 <br/>High Accuracy:&nbsp<input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox"/>
+<br/>Verbalize Advice:&nbsp<input class="verbalizeCheckbox" type="checkbox" value="1" name="verbalizeCheckbox" id="verbalizeCheckbox" checked/>
 </div>
 </div>
 <div id="Error">
@@ -26,7 +27,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1032<br/>
+    <br/>v0.1033<br/>
 </div>
 
 <script type="text/javascript">
@@ -41,6 +42,7 @@ var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
 var myAddress = '';
 var added = 0;
 var highacc = false;
+var verbalize = true;
 var currentSpeed = 0;
 var xhr;
 // Create a two dimensional array for keeping our store data
@@ -100,6 +102,7 @@ watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showE
 }
 function showClimberLocation(position) {
 highacc = document.getElementById('highaccuracyCheckbox').checked;
+verbalize = document.getElementById('verbalizeCheckbox').checked;
 // Hide/show appropriate elements
 InputElements.style.display = 'block';
 locationError.style.display = 'none';
@@ -179,18 +182,18 @@ function processAddressRequest(e) {
     if (xhr.readyState == 4 && xhr.status == 200) {
         var response = JSON.parse(xhr.responseText);
         var formattedAddress;
+        var roadname = '';
         if (response.results.length == 0) {
             formattedAddress = "Address: unknown";
             myAddress = "Address: unknown";
         } else {
             formattedAddress = "Address: " + response.results[0].formatted_address;
             myAddress = "Address: " + response.results[0].formatted_address;
-        }
-        var roadname = '';
-        for (i = 0; i < response.results[0].address_components.length; ++i) {
-            if (response.results[0].address_components[i].types[0] == "route") {
-                roadname = response.results[0].address_components[i].long_name;
-                break;
+            for (i = 0; i < response.results[0].address_components.length; ++i) {
+                if (response.results[0].address_components[i].types[0] == "route") {
+                    roadname = response.results[0].address_components[i].long_name;
+                    break;
+                }
             }
         }
         var interstate = "Not on an Interstate";
@@ -201,14 +204,18 @@ function processAddressRequest(e) {
             
             if (currentSpeed != 0 && currentSpeed < (speedlimit / 2.0)) {
                 // suggest new speed
-                advisory = "JAMITON detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
-                var msg = new SpeechSynthesisUtterance(advisory);
-                window.speechSynthesis.speak(msg);
+                advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
+                if (verbalize) {
+                    var msg = new SpeechSynthesisUtterance(advisory);
+                    window.speechSynthesis.speak(msg);
+                }
 
             } else {
-                advisory = "No JAMITON detected (not going slow enough)";
-                var msg = new SpeechSynthesisUtterance(advisory);
-                window.speechSynthesis.speak(msg);
+                advisory = "No congestion detected (not going slow enough)";
+                if (verbalize) {
+                    var msg = new SpeechSynthesisUtterance(advisory);
+                    window.speechSynthesis.speak(msg);
+                }
             }
         }
         addressContent.innerHTML = "Road: " + roadname + "</br>" + formattedAddress + "</br></br>" + interstate + "</br></br>" + advisory;
