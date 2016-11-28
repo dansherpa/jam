@@ -27,7 +27,7 @@ Press this button to find your current data:
 <div id="GoogleMap" style="padding-left:20px;">
 </div>
 <div id="Version" style="padding-left:20px;">
-    <br/>v0.1033<br/>
+    <br/>v0.1034<br/>
 </div>
 
 <script type="text/javascript">
@@ -44,6 +44,7 @@ var added = 0;
 var highacc = false;
 var verbalize = true;
 var currentSpeed = 0;
+var lastAdvisory = '';
 var xhr;
 // Create a two dimensional array for keeping our store data
 var mountainData = new Array(3)
@@ -205,14 +206,16 @@ function processAddressRequest(e) {
             if (currentSpeed != 0 && currentSpeed < (speedlimit / 2.0)) {
                 // suggest new speed
                 advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
-                if (verbalize) {
+                if (verbalize && (advisory != lastAdvisory)) {
+                    lastAdvisory = advisory;
                     var msg = new SpeechSynthesisUtterance(advisory);
                     window.speechSynthesis.speak(msg);
                 }
 
             } else {
                 advisory = "No congestion detected (not going slow enough)";
-                if (verbalize) {
+                if (verbalize && (advisory != lastAdvisory)) {
+                    lastAdvisory = advisory;
                     var msg = new SpeechSynthesisUtterance(advisory);
                     window.speechSynthesis.speak(msg);
                 }
