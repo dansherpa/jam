@@ -72,7 +72,7 @@
   </div>
 
   <br />
-  <div class="smalltext">v0.1045</div>
+  <div class="smalltext">v0.1046</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
@@ -207,7 +207,7 @@
           debugMessage("now.getTime() - lastUpdateTime.getTime(): " + (now.getTime() - lastUpdateTime.getTime()));
         }
         debugMessage("frequency: " + frequency);
-        if(lastUpdateTime && (now.getTime() - lastUpdateTime.getTime() > (frequency * 1000))){
+        if(lastUpdateTime && (now.getTime() - lastUpdateTime.getTime() < (frequency * 1000))){
             debugMessage("Ignoring position update");
             return;
         }
