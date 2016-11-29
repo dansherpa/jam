@@ -35,6 +35,21 @@ h1{
     display: inline-block;
 }
 
+.carlengths{
+    padding-top: 10px;
+    font-size: 36px;
+}
+
+.speed{
+    padding-top: 10px;
+    font-size: 36px;
+}
+
+.bigtext{
+    padding-top: 10px;
+    font-size: 36px;
+}
+
 .smalltext{
     padding-top: 5px;
     font-size: 12px;

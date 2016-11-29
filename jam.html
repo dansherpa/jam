@@ -7,7 +7,7 @@
   <title>Jam tracker</title>
 </head>
 
-<body onload="checkGeolocationSupport()">
+<body onload="checkGeolocationSupport()" ondblclick="showDebug()">
   <div id="ClimberTrackerHeader">
     <h3>Jam Tracker</h3>
   </div>
@@ -59,17 +59,17 @@
     <div id="scoreboard">
       <div id="speedDiv">
         <span class="speed"></span>
-        <div class="smalltext">Your Speed (mph)</div>
+        <div class="bigtext">Your Speed (mph)</div>
       </div>
       <div id="carLengthsDiv">
         <span class="carlengths"></span>
-        <div class="smalltext">Car Lengths</div>
+        <div class="bigtext">Car Lengths</div>
       </div>
     </div>
   </div>
 
   <br />
-  <div class="smallertext">v.1039</div>
+  <div class="smalltext">v.1040</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
@@ -93,6 +93,7 @@
     var currentSpeed = 0;
     var lastAdvisory = '';
     var lastUpdateTime = 0;
+    var debugState = false;
     var xhr;
     // Create a two dimensional array for keeping our store data
     var mountainData = new Array(3)
@@ -114,6 +115,17 @@
     mountainData[1][2] = "-82.26511";
     mountainData[2][2] = "-121.7604446";
 
+    function showDebug(e) {
+        if (debugState == false) {
+          debugState = true;
+          InputElements.style.display = 'block';
+          bigDisplay.style.display = 'none';
+        } else {
+          debugState = false;
+          InputElements.style.display = 'none';
+          bigDisplay.style.display = 'block';
+        }
+    }
     function sliderOutputUpdate(vol) {
       document.getElementById('freqValue').value = vol;
     }
