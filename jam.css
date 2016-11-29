@@ -12,6 +12,22 @@ h1{
   margin: 40px 0px 20px;
 }
 
+input[type='foocheckbox'] {
+    -webkit-appearance:none;
+    width:30px;
+    height:30px;
+    background:white;
+    border-radius:5px;
+    border:2px solid #555;
+}
+input[type='foocheckbox']:checked {
+    background: #abd;
+}
+
+input[type=checkbox] {width:30px; height:30px;}
+input[type=range] {width:400px; height:30px;}
+input[type=button] {width:240px; height:198px;}
+
 #clockdiv{
     font-family: sans-serif;
     color: #fff;
@@ -53,6 +69,8 @@ h1{
 .debugtext{
     padding-top: 5px;
     font-size: 12px;
+    text-align: left;
+    font-family: courier;
 }
 
 .smalltext{

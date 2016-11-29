@@ -13,21 +13,20 @@
   </div>
 
   <div id="MountainClimberTrackerInputElements">
-    Press this button start/stop polling:
+    <div id="InputElementIndent" style="padding-left:10px; text-align: left">
+      <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
 
-    <div id="InputElementIndent" style="padding-left:10px;">
-      <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/><br />
-      High Accuracy:&nbsp;
+      <br/><br/><label for="highaccuracyCheckbox" class=bigtext>High Accuracy:</label>
       <input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox" />
-      <br />
-      Verbalize Advice:&nbsp;
+
+      <br/><br/><label for="verbalizeCheckbox" class=bigtext>Verbalize Advice:</label>
       <input class="verbalizeCheckbox" type="checkbox" value="1" name="verbalizeCheckbox" id="verbalizeCheckbox" checked="true" />
-      <br />
-      Append Debug Info:&nbsp;
-      <input class="highaccuracyCheckbox" type="checkbox" value="1" name="appendCheckbox" id="appendCheckbox" checked="true"/>
-      <br />
-      Polling Interval (seconds):&nbsp;
-      <input class="updateFrequencySlider" type="range" name="updateFrequencySlider" id="updateFrequencySlider" 
+
+      <br/><br/><label for="appendCheckbox" class=bigtext>Append Debug Info:</label>
+      <input class="appendCheckbox" type="checkbox" value="1" name="appendCheckbox" id="appendCheckbox" checked="true"/>
+
+      <br/><br/><label for="updateFrequencySlider" class=bigtext>Polling Interval (seconds):</label>
+      <br/><input class="updateFrequencySlider" type="range" name="updateFrequencySlider" id="updateFrequencySlider" 
         min="1" max="60" value="5"  oninput="sliderOutputUpdate(value)"
         list="freqList">
       <datalist id="freqList">
@@ -46,7 +45,7 @@
       <em>We tried but we can't calculate your location.</em>
     </div>
 
-    <div id="TrackingTitle">
+    <div id="TrackingTitle" class="debugtext">
       <h4>Debug Info</h4>
     </div>
 
@@ -72,7 +71,7 @@
   </div>
 
   <br />
-  <div class="smalltext">v0.1046</div>
+  <div class="smalltext">v0.1047</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
