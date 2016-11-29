@@ -13,15 +13,18 @@
   </div>
 
   <div id="MountainClimberTrackerInputElements">
-    Press this button to find your current data:
+    Press this button start/stop polling:
 
     <div id="InputElementIndent" style="padding-left:10px;">
-      <input type="button" onclick="startTracking(0)" value="Find Me!" /><br />
+      <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/><br />
       High Accuracy:&nbsp;
       <input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox" />
       <br />
       Verbalize Advice:&nbsp;
       <input class="verbalizeCheckbox" type="checkbox" value="1" name="verbalizeCheckbox" id="verbalizeCheckbox" checked="true" />
+      <br />
+      Append Debug Info:&nbsp;
+      <input class="highaccuracyCheckbox" type="checkbox" value="1" name="appendCheckbox" id="appendCheckbox" checked="true"/>
       <br />
       Polling Interval (seconds):&nbsp;
       <input class="updateFrequencySlider" type="range" name="updateFrequencySlider" id="updateFrequencySlider" 
@@ -44,12 +47,12 @@
     </div>
 
     <div id="TrackingTitle">
-      <h4>Tracking your address, location, velocity, and heading..</h4>
+      <h4>Debug Info</h4>
     </div>
 
-    <div id="TrackingResults" style="padding-left:20px;"></div>
+    <div id="TrackingResults" class="debugtext"></div>
 
-    <div id="AddressResults" style="padding-left:20px;"></div>
+    <div id="AddressResults" class="debugtext"></div>
 
     <div id="GoogleMap" style="padding-left:20px;"></div>
 
@@ -69,7 +72,7 @@
   </div>
 
   <br />
-  <div class="smalltext">v.1041</div>
+  <div class="smalltext">v0.1043</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
@@ -85,15 +88,18 @@
     var carLengthsDiv = document.getElementById("carLengthsDiv");
     var speedSpan = scoreboard.querySelector('.speed');
     var carLengthsSpan = scoreboard.querySelector('.carlengths');
+    var startStop = document.getElementById("StartStop");
     var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
     var myAddress = '';
     var added = 0;
     var highacc = false;
     var verbalize = true;
+    var appendDebug = true;
     var currentSpeed = 0;
     var lastAdvisory = '';
     var lastUpdateTime = 0;
     var debugState = false;
+    var started = false;
     var xhr;
     // Create a two dimensional array for keeping our store data
     var mountainData = new Array(3)
@@ -161,6 +167,15 @@
     }
 
     function startTracking(mountainIndex) {
+        if (started) {
+          debugMessage("Stop pressed.")
+          started = false;
+          StartStop.value = "Start";
+        } else {
+          debugMessage("Start pressed.")
+          started = true;
+          StartStop.value = "Stop";
+        }
         carLengthsSpan.style.display = 'none';
         carLengthsDiv.style.display = 'none';
         // Set index tracking variable to selected mountain data array index
@@ -168,26 +183,35 @@
         // Clear position watch
         navigator.geolocation.clearWatch(watchPositionId);
         // Start watching location
-        watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, {
+
+        if (started) {
+          watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, {
             enableHighAccuracy: highacc,
             maximumAge: 0,
             timeout: 30000
-        });
-        InputElements.style.display = 'none';
-        bigDisplay.style.display = 'block';
+          });
+        } else {
+          watchPositionId = undefined;
+        }
+        if (!debugState) {
+          InputElements.style.display = 'none';
+          bigDisplay.style.display = 'block';
+        }
     }
 
     function showClimberLocation(position) {
+        debugMessage("new position");
         frequency = document.getElementById('updateFrequencySlider').value;
         var now = new Date();
         if(lastUpdateTime && now.getTime() - lastUpdateTime.getTime() > (frequency * 1000)){
-            console.log("Ignoring position update");
+            debugMessage("Ignoring position update");
             return;
         }
         lastUpdateTime = now;
 
         highacc = document.getElementById('highaccuracyCheckbox').checked;
         verbalize = document.getElementById('verbalizeCheckbox').checked;
+        appendDebug = document.getElementById('appendCheckbox').checked;
         // Hide/show appropriate elements
         //InputElements.style.display = 'block';
         locationError.style.display = 'none';
@@ -200,8 +224,12 @@
         //currentDistance = calculateDistance(position.coords.latitude, position.coords.longitude, mountainData[mountainDataIndex][1], mountainData[mountainDataIndex][2]);
         var timestampDate = new Date(position.timestamp);
         // Build results
+        debugMessage("building results");
         var geoloactionResults = '';
-        geoloactionResults = '&nbsp;Position (latitude, longitude): ' + position.coords.latitude + ', ' + position.coords.longitude + '<br />';
+        // last updated
+        geoloactionResults = '&nbsp;Last Updated: ' + timestampDate.toLocaleString() + "<br/>";
+
+        geoloactionResults = geoloactionResults + '&nbsp;Position (latitude, longitude): ' + position.coords.latitude + ', ' + position.coords.longitude + '<br />';
         geoloactionResults = geoloactionResults + '&nbsp;(position accurate to within ' + Math.round(convertMetersToFeet(position.coords.accuracy)) + ' feet)<br />';
         if ((position.coords.altitude == null) || ((position.coords.altitude == 0) && (position.coords.altitudeAccuracy == 0))) {
             // Altitude cannot be determined -- generate appropriate message
@@ -227,9 +255,6 @@
             currentSpeed = position.coords.speed * 2.2369362920544;
         }
 
-        // last updated
-        geoloactionResults = geoloactionResults + '&nbsp;Last Updated: ' + timestampDate.toLocaleString();
-
         geoloactionResults = geoloactionResults + '<br/>&nbsp;High Accuracy: ' + highacc;
 
         geoloactionResults = geoloactionResults + '<br/>&nbsp;Interval: ' + frequency + " second(s)";
@@ -237,62 +262,92 @@
         var googleLatitudeLongitude = position.coords.latitude + "," + position.coords.longitude;
 
         // Show address
+        debugMessage("getting address async");
         showAddress(googleLatitudeLongitude);
+        debugMessage("got address async");
 
         // Show results
-        resultsContent.innerHTML = geoloactionResults;
+        if (appendDebug) {
+          debugMessage("appending debug");
+          resultsContent.innerHTML = geoloactionResults + "<br/><br/>" + resultsContent.innerHTML;
+        } else {
+          debugMessage("NOT appending debug");
+          resultsContent.innerHTML = geoloactionResults;
+        }
 
         // Show map
         var mapImageUrl = "http://maps.googleapis.com/maps/api/staticmap?center=" + googleLatitudeLongitude + "&zoom=12&size=300x300&sensor=false";
         //googleMap.innerHTML = "<img src='" + mapImageUrl + "' />";
     }
 
+    function debugMessage(m) {
+      var d = new Date();
+      resultsContent.innerHTML = d.toLocaleString('en-US', { hour12: false, timeZone: "UTC"}) + "." + (d.getMilliseconds() % 1000) + ": " + m + "<br/>" + resultsContent.innerHTML;
+    }
+
     function showAddress(latlong) {
         if (added == 0) {
+            debugMessage("establishing address callback start");
             added = 1;
             xhr = new XMLHttpRequest();
             xhr.addEventListener("readystatechange", processAddressRequest);
             xhr.open('GET', addressUrl + latlong);
             xhr.send();
+            debugMessage("establishing address callback end");
         } else {
+            debugMessage("NOT establishing address callback start");
             xhr.open('GET', addressUrl + latlong);
             xhr.send();
+            debugMessage("NOT establishing address callback end");
         }
     }
 
     function processAddressRequest(e) {
+        debugMessage("address callback activated");
         myAddress = "Address: ";
         formattedAddress = "Address: ";
         if (xhr.readyState == 4 && xhr.status == 200) {
+            debugMessage("address callback processing address");
             var response = JSON.parse(xhr.responseText);
             var formattedAddress;
             var roadname = '';
             if (response.results.length == 0) {
+                debugMessage("unknown address");
                 formattedAddress = "Address: unknown";
                 myAddress = "Address: unknown";
             } else {
+                debugMessage("got address");
                 formattedAddress = "Address: " + response.results[0].formatted_address;
+                debugMessage("formatting address");
                 myAddress = "Address: " + response.results[0].formatted_address;
                 for (i = 0; i < response.results[0].address_components.length; ++i) {
+                    debugMessage("extracting route");
                     if (response.results[0].address_components[i].types[0] == "route") {
+                        debugMessage("got a route");
                         roadname = response.results[0].address_components[i].long_name;
                         break;
                     }
                 }
+                debugMessage("route: " + roadname);
             }
             var interstate = "Not on an Interstate";
             var advisory = "";
             if (true || roadname.match('Interstate')) {
+                debugMessage("on an interstate");
                 var speedLimit = 65;
                 interstate = "You are on an Interstate (well, not really maybe, but we're testing)! Drive carefully...";
 
+                debugMessage("setting speed");
                 speedSpan.innerHTML = Math.round(currentSpeed);
+                debugMessage("speed set");
                 if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
+                    debugMessage("jam detected");
                     // turn red
                     // suggest new speed
                     //advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
                     advisory = "Congestion detected: Maintain a distance of 3 car lengths behind the vehicle in front of you."
                     if (verbalize && (advisory != lastAdvisory)) {
+                        debugMessage("verbalizing advisory");
                         document.body.style.backgroundColor = "red";
                         carLengthsSpan.style.display = 'block';
                         carLengthsDiv.style.display = 'block';
@@ -300,9 +355,11 @@
                         lastAdvisory = advisory;
                         var msg = new SpeechSynthesisUtterance(advisory);
                         window.speechSynthesis.speak(msg);
+                        debugMessage("verbalized advisory");
                     }
 
                 } else {
+                    debugMessage("NO jam detected");
                     // turn green
                     document.body.style.backgroundColor = "green";
                     carLengthsSpan.style.display = 'none';
@@ -316,11 +373,14 @@
                     }
                 }
             } else {
+              debugMessage("NOT on an interstate");
               document.body.style.backgroundColor = "green";
               carLengthsSpan.style.display = 'none';
               carLengthsDiv.style.display = 'none';
             }
+            debugMessage("showing address");
             addressContent.innerHTML = "Road: " + roadname + "<\/br>" + formattedAddress + "<\/br><\/br>" + interstate + "<\/br><\/br>" + advisory;
+            debugMessage("showed address");
         }
     }
 

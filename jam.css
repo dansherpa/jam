@@ -50,6 +50,11 @@ h1{
     font-size: 36px;
 }
 
+.debugtext{
+    padding-top: 5px;
+    font-size: 12px;
+}
+
 .smalltext{
     padding-top: 5px;
     font-size: 12px;
