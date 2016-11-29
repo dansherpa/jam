@@ -72,7 +72,7 @@
   </div>
 
   <br />
-  <div class="smalltext">v0.1044</div>
+  <div class="smalltext">v0.1045</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
@@ -204,7 +204,7 @@
         frequency = document.getElementById('updateFrequencySlider').value;
         var now = new Date();
         if (lastUpdateTime) {
-          debugMessage("now.getTime() - lastUpdateTime.getTime(): " + now.getTime() - lastUpdateTime.getTime());
+          debugMessage("now.getTime() - lastUpdateTime.getTime(): " + (now.getTime() - lastUpdateTime.getTime()));
         }
         debugMessage("frequency: " + frequency);
         if(lastUpdateTime && (now.getTime() - lastUpdateTime.getTime() > (frequency * 1000))){
