@@ -64,6 +64,7 @@ input[type=button] {width:240px; height:198px;}
 .bigtext{
     padding-top: 10px;
     font-size: 36px;
+    font-weight: 800;
 }
 
 .debugtext{
