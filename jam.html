@@ -23,6 +23,9 @@
       <br/><br/><label for="verbalizeCheckbox" class=bigtext>Verbalize Advice:</label>
       <input class="verbalizeCheckbox" type="checkbox" value="1" name="verbalizeCheckbox" id="verbalizeCheckbox" checked="true" />
 
+      <br/><br/><label for="alwaysHighwayCheckbox" class=bigtext>Always on a highway:</label>
+      <input class="alwaysHighwayCheckbox" type="checkbox" value="1" name="alwaysHighwayCheckbox" id="alwaysHighwayCheckbox" checked="true" />
+
       <br/><br/><label for="appendCheckbox" class=bigtext>Append Debug Info:</label>
       <input class="appendCheckbox" type="checkbox" value="1" name="appendCheckbox" id="appendCheckbox" checked="true"/>
 
@@ -62,17 +65,15 @@
     <div class="bigtext" id="scoreboard">
       <div id="speedDiv">
         <span class="speed"></span>
-        <div>Your Speed (mph)</div>
       </div>
       <div id="carLengthsDiv">
         <span class="carlengths"></span>
-        <div class="bigtext">Car Lengths</div>
       </div>
     </div>
   </div>
 
   <br />
-  <div class="smalltext">v0.1053</div>
+  <div class="smalltext">v0.1054</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
@@ -95,6 +96,7 @@
     var highacc = false;
     var verbalize = true;
     var appendDebug = true;
+    var alwaysHighway = true;
     var currentSpeed = 0;
     var lastAdvisory = '';
     var lastUpdateTime = 0;
@@ -218,6 +220,7 @@
         highacc = document.getElementById('highaccuracyCheckbox').checked;
         verbalize = document.getElementById('verbalizeCheckbox').checked;
         appendDebug = document.getElementById('appendCheckbox').checked;
+        alwaysHighway = document.getElementById('alwaysHighwayCheckbox').checked;
         // Hide/show appropriate elements
         //InputElements.style.display = 'block';
         locationError.style.display = 'none';
@@ -338,26 +341,31 @@
             }
             var interstate = "Not on an Interstate";
             var advisory = "";
-            if (true || roadname.match('Interstate')) {
+            if (alwaysHighway || roadname.match('Interstate')) {
                 debugMessage("on an interstate");
                 var speedLimit = 65;
                 interstate = "You are on an Interstate (well, not really maybe, but we're testing)! Drive carefully...";
 
-                debugMessage("setting speed");
-                speedSpan.innerHTML = Math.round(currentSpeed);
+                debugMessage("setting speed to " + Math.round(currentSpeed));
+                speedSpan.innerHTML = "Current Speed: " + Math.round(currentSpeed) + " mph";
                 debugMessage("speed set");
                 if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
                     debugMessage("jam detected");
+                    gapSeconds = carLengthsToSeconds(3, currentSpeed);
+                    debugMessage("Gap Seconds: " + gapSeconds);
+                    roundedGapSeconds = Math.round(gapSeconds * 10) / 10.0;
+                    debugMessage("Rounded gap Seconds: " + roundedGapSeconds);
                     // turn red
                     // suggest new speed
                     //advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
-                    advisory = "Congestion detected: Maintain a distance of 3 car lengths behind the vehicle in front of you."
+                    advisory = "Congestion detected: Maintain a distance of 3 car lengths behind the vehicle in front of you. " +
+                      "At your current speed that equates to " + roundedGapSeconds + " seconds.";
                     if (verbalize && (advisory != lastAdvisory)) {
                         debugMessage("verbalizing congestion advisory");
                         document.body.style.backgroundColor = "red";
                         carLengthsSpan.style.display = 'block';
                         carLengthsDiv.style.display = 'block';
-                        carLengthsSpan.innerHTML = '3';
+                        carLengthsSpan.innerHTML = 'Distance: 3 car lengths (' + roundedGapSeconds + ' seconds)';
                         lastAdvisory = advisory;
                         var msg = new SpeechSynthesisUtterance(advisory);
                         window.speechSynthesis.speak(msg);
@@ -395,6 +403,16 @@
     // Returns a random number between min (inclusive) and max (exclusive)
     function getRandomArbitrary(min, max) {
         return Math.random() * (max - min) + min;
+    }
+
+    function mphToFps(mph) {
+      return 1.466666667 * mph;
+    }
+
+    function carLengthsToSeconds(lengths, mph) {
+      fps = mphToFps(mph);
+      ft = (lengths + 1) * 14.766666667;
+      return ft / fps;
     }
 
     function calculateDistance(latitude1, longitude1, latitude2, longitude2) {
