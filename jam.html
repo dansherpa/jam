@@ -71,7 +71,7 @@
   </div>
 
   <br />
-  <div class="smalltext">v0.1050</div>
+  <div class="smalltext">v0.1051</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
@@ -352,7 +352,7 @@
                     //advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
                     advisory = "Congestion detected: Maintain a distance of 3 car lengths behind the vehicle in front of you."
                     if (verbalize && (advisory != lastAdvisory)) {
-                        debugMessage("verbalizing advisory");
+                        debugMessage("verbalizing congestion advisory");
                         document.body.style.backgroundColor = "red";
                         carLengthsSpan.style.display = 'block';
                         carLengthsDiv.style.display = 'block';
@@ -360,7 +360,7 @@
                         lastAdvisory = advisory;
                         var msg = new SpeechSynthesisUtterance(advisory);
                         window.speechSynthesis.speak(msg);
-                        debugMessage("verbalized advisory");
+                        debugMessage("verbalized congestion advisory");
                     }
 
                 } else {
@@ -372,9 +372,11 @@
                     carLengthsSpan.innerHTML = '';
                     advisory = "No congestion detected: Do not exceed the speed limit to ensure you don't cause congestion.";
                     if (verbalize && (advisory != lastAdvisory)) {
+                        debugMessage("verbalizing NO congestion advisory");
                         lastAdvisory = advisory;
                         var msg = new SpeechSynthesisUtterance(advisory);
                         window.speechSynthesis.speak(msg);
+                        debugMessage("verbalized NO congestion advisory");
                     }
                 }
             } else {
