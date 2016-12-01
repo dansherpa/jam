@@ -11,12 +11,11 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
+    <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
 
   <div id="MountainClimberTrackerInputElements">
     <div id="InputElementIndent" style="padding-left:10px; text-align: left">
-      <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
-
       <br/><br/><label for="highaccuracyCheckbox" class=bigtext>High Accuracy:</label>
       <input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox" />
 
@@ -53,6 +52,8 @@
       <h4>Debug Info</h4>
     </div>
 
+    <div class="smalltext">v0.1055</div>
+
     <div id="TrackingResults" class="debugtext"></div>
 
     <div id="AddressResults" class="debugtext"></div>
@@ -73,7 +74,6 @@
   </div>
 
   <br />
-  <div class="smalltext">v0.1054</div>
   <script type="text/javascript">
 /* <![CDATA[ */
     // Elements that we will need to manipulate
@@ -155,7 +155,6 @@
             addressContent.style.display = 'none';
             googleMap.style.display = 'none';
             bigDisplay.style.display = 'none';
-            startTracking(0);
         } else {
             // Browser does not support geolocation
             //InputElements.style.display = 'none';
