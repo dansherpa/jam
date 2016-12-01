@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
-    <div class="smalltext">v0.1056</div>
+    <div class="smalltext">v0.1058</div>
     <br/>
     <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
@@ -32,7 +32,7 @@
 
       <br/><br/><label for="updateFrequencySlider" class=bigtext>Polling Interval (seconds):</label>
       <br/><input class="updateFrequencySlider" type="range" name="updateFrequencySlider" id="updateFrequencySlider" 
-        min="1" max="60" value="5"  oninput="sliderOutputUpdate(value)"
+        min="1" max="60" value="15"  oninput="sliderOutputUpdate(value)"
         list="freqList">
       <datalist id="freqList">
         <option>1</option>
@@ -43,7 +43,25 @@
         <option>50</option>
         <option>60</option>
       </datalist>
-      <output for="updateFrequencySlider" id="freqValue">5</output>
+      <output for="updateFrequencySlider" id="freqValue">15</output>
+
+      <br/><br/><label for="carLengthSlider" class=bigtext>Car Lengths to Maintain:</label>
+      <br/><input class="carLengthSlider" type="range" name="carLengthSlider" id="carLengthSlider" 
+        min="1" max="10" value="4"  oninput="carLengthSliderOutputUpdate(value)"
+        list="carLengthList">
+      <datalist id="carLengthList">
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+        <option>7</option>
+        <option>8</option>
+        <option>9</option>
+        <option>10</option>
+      </datalist>
+      <output for="carLengthSlider" id="carLengthValue">4</output>
     </div>
 
     <div id="Error">
@@ -98,10 +116,13 @@
     var appendDebug = true;
     var alwaysHighway = true;
     var currentSpeed = 0;
+    var lastSpeed = 0;
     var lastAdvisory = '';
     var lastUpdateTime = 0;
     var debugState = false;
     var started = false;
+    var carLengths = 4;
+    var accelCount = 0;
     var xhr;
     // Create a two dimensional array for keeping our store data
     var mountainData = new Array(3)
@@ -134,8 +155,13 @@
           bigDisplay.style.display = 'block';
         }
     }
+
     function sliderOutputUpdate(vol) {
       document.getElementById('freqValue').value = vol;
+    }
+
+    function carLengthSliderOutputUpdate(vol) {
+      document.getElementById('carLengthValue').value = vol;
     }
 
     // This function creates our two dimensional array
@@ -204,11 +230,14 @@
     function showClimberLocation(position) {
         debugMessage("new position");
         frequency = document.getElementById('updateFrequencySlider').value;
+        carLengths = document.getElementById('carLengthSlider').value;
+        debugMessage('Car lengths: ' + carLengths);
         var now = new Date();
         if (lastUpdateTime) {
           debugMessage("now.getTime() - lastUpdateTime.getTime(): " + (now.getTime() - lastUpdateTime.getTime()));
         }
         debugMessage("frequency: " + frequency);
+        debugMessage("accelCount: " + accelCount);
         if(lastUpdateTime && (now.getTime() - lastUpdateTime.getTime() < (frequency * 1000))){
             debugMessage("Ignoring position update");
             return;
@@ -348,24 +377,28 @@
                 debugMessage("setting speed to " + Math.round(currentSpeed));
                 speedSpan.innerHTML = "Current Speed: " + Math.round(currentSpeed) + " mph";
                 debugMessage("speed set");
+                if (currentSpeed > (lastSpeed * 1.1)) {
+                  accelCount = accelCount + 1;
+                }
+                lastSpeed = currentSpeed;
                 if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
                     debugMessage("jam detected");
-                    gapSeconds = carLengthsToSeconds(3, currentSpeed);
+                    gapSeconds = carLengthsToSeconds(carLengths, currentSpeed);
                     debugMessage("Gap Seconds: " + gapSeconds);
                     roundedGapSeconds = Math.round(gapSeconds * 10) / 10.0;
                     debugMessage("Rounded gap Seconds: " + roundedGapSeconds);
                     // turn red
                     // suggest new speed
                     //advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
-                    advisory = "Congestion detected: Maintain a distance of 3 car lengths behind the vehicle in front of you. " +
-                      "At your current speed that equates to " + roundedGapSeconds + " seconds.";
+                    advisory = "Congestion detected: Maintain a distance of " + carLengths + " car lengths behind the vehicle in front of you. ";
                     if (verbalize && (advisory != lastAdvisory)) {
                         debugMessage("verbalizing congestion advisory");
                         document.body.style.backgroundColor = "red";
                         carLengthsSpan.style.display = 'block';
                         carLengthsDiv.style.display = 'block';
-                        carLengthsSpan.innerHTML = 'Distance: 3 car lengths (' + roundedGapSeconds + ' seconds)';
+                        carLengthsSpan.innerHTML = 'Distance: ' + carLengths + " car lengths (" + roundedGapSeconds + ' seconds)';
                         lastAdvisory = advisory;
+                        advisory = advisory + "At your current speed of " + Math.round(currentSpeed) + " that equates to " + roundedGapSeconds + " seconds.";
                         var msg = new SpeechSynthesisUtterance(advisory);
                         window.speechSynthesis.speak(msg);
                         debugMessage("verbalized congestion advisory");
@@ -378,7 +411,13 @@
                     carLengthsSpan.style.display = 'none';
                     carLengthsDiv.style.display = 'none';
                     carLengthsSpan.innerHTML = '';
-                    advisory = "No congestion detected: Do not exceed the speed limit to ensure you don't cause congestion.";
+                    if (accelCount > 4 && currentSpeed >= (speedLimit * 0.9)) {
+                      debugMessage("leaving congestion");
+                      accelCount = 0;
+                      advisory = "You appear to be leaving the congested area. Please do not accelerate quickly and do not exceed the spped limit.";
+                    } else {
+                      advisory = "No congestion detected: Do not exceed the speed limit to ensure you don't cause congestion.";
+                    }
                     if (verbalize && (advisory != lastAdvisory)) {
                         debugMessage("verbalizing NO congestion advisory");
                         lastAdvisory = advisory;
