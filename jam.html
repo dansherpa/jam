@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
-    <div class="smalltext">v0.1061</div>
+    <div class="smalltext">v0.1062</div>
     <br/>
     <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
@@ -32,7 +32,7 @@
 
       <br/><br/><label for="updateFrequencySlider" class=bigtext>Polling Interval (seconds):</label>
       <br/><input class="updateFrequencySlider" type="range" name="updateFrequencySlider" id="updateFrequencySlider" 
-        min="1" max="60" value="15"  oninput="sliderOutputUpdate(value)"
+        min="1" max="60" value="5"  oninput="sliderOutputUpdate(value)"
         list="freqList">
       <datalist id="freqList">
         <option>1</option>
@@ -43,7 +43,7 @@
         <option>50</option>
         <option>60</option>
       </datalist>
-      <output for="updateFrequencySlider" id="freqValue">15</output>
+      <output for="updateFrequencySlider" id="freqValue">5</output>
 
       <br/><br/><label for="carLengthSlider" class=bigtext>Car Lengths to Maintain:</label>
       <br/><input class="carLengthSlider" type="range" name="carLengthSlider" id="carLengthSlider" 
