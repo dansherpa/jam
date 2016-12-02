@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
-    <div class="smalltext">v0.1060</div>
+    <div class="smalltext">v0.1061</div>
     <br/>
     <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
@@ -124,6 +124,7 @@
     var carLengths = 4;
     var accelCount = 0;
     var xhr;
+    var isChrome = ((navigator.userAgent.toLowerCase().indexOf('chrome') > -1) &&(navigator.vendor.toLowerCase().indexOf("google") > -1));
     // Create a two dimensional array for keeping our store data
     var mountainData = new Array(3)
     createTwoDimensionalArray(3);
@@ -147,10 +148,12 @@
     function showDebug(e) {
         if (debugState == false) {
           debugState = true;
+          resultsTitle.style.display = true;
           InputElements.style.display = 'block';
           bigDisplay.style.display = 'none';
         } else {
           debugState = false;
+          resultsTitle.style.display = false;
           InputElements.style.display = 'none';
           bigDisplay.style.display = 'block';
         }
@@ -176,7 +179,7 @@
             // otherwise send to function that shows the specific reason why location cannot be determined
             //InputElements.style.display = 'block';
             locationError.style.display = 'none';
-            resultsTitle.style.display = 'none';
+            resultsTitle.style.display = 'block';
             resultsContent.style.display = 'none';
             addressContent.style.display = 'none';
             googleMap.style.display = 'none';
@@ -195,6 +198,12 @@
     }
 
     function startTracking(mountainIndex) {
+        if (isChrome) {
+          debugMessage('Browser IS chrome');
+        } else {
+          debugMessage('Browser is NOT chrome');
+        }
+
         if (started) {
           debugMessage("Stop pressed.")
           started = false;
@@ -209,15 +218,17 @@
         // Set index tracking variable to selected mountain data array index
         mountainDataIndex = mountainIndex;
         // Clear position watch
-        navigator.geolocation.clearWatch(watchPositionId);
-        // Start watching location
+        var timeout = setTimeout( function() { navigator.geolocation.clearWatch( watchPositionId ); }, 5000 );
 
+        // Start watching location
         if (started) {
-          watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, {
-            enableHighAccuracy: highacc,
-            maximumAge: 0,
-            timeout: 30000
-          });
+          var options = null;
+          if (isChrome) {
+            options = {enableHighAccuracy: highacc, maximumAge: 15000, timeout: 30000};
+          } else {
+            options = {enableHighAccuracy: highacc, maximumAge: Infinity, timeout: 0};
+          }
+          watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, options);
         } else {
           watchPositionId = undefined;
         }
@@ -286,10 +297,12 @@
         if ((position.coords.speed == null) || (isNaN(position.coords.speed))) {
             // Heading cannot be determined -- generate appropriate message
             geoloactionResults = geoloactionResults + '&nbsp;Speed could not be determined.<br />';
+            debugMessage('Speed could NOT be determined.')
         } else {
             // Calculate and display results normally
             geoloactionResults = geoloactionResults + '&nbsp;Speed: ' + (position.coords.speed * 2.2369362920544) + ' (miles per hour)<br />';
             currentSpeed = position.coords.speed * 2.2369362920544;
+            debugMessage('speed from device: ' + position.coords.speed + " (" + currentSpeed + " mph)");
         }
 
         geoloactionResults = geoloactionResults + '<br/>&nbsp;High Accuracy: ' + highacc;
@@ -377,7 +390,7 @@
                 debugMessage("currentSpeed: " + currentSpeed + ", lastSpeed:" + lastSpeed + ", accelCount: " + accelCount);
                 speedSpan.innerHTML = "Current Speed: " + Math.round(currentSpeed) + " mph";
                 debugMessage("speed set");
-                if (currentSpeed >= (lastSpeed * 1.1)) {
+                if (currentSpeed != 0 && currentSpeed >= (lastSpeed * 1.1)) {
                   accelCount = accelCount + 1;
                   debugMessage('accelCount++ = ' + accelCount);
                 } else if (currentSpeed < lastSpeed) {
@@ -385,7 +398,7 @@
                     debugMessage('accelCount reset');
                 }
                 lastSpeed = currentSpeed;
-                if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
+                if (currentSpeed != 0 && currentSpeed < 20.0) {
                     debugMessage("jam detected");
                     gapSeconds = carLengthsToSeconds(carLengths, currentSpeed);
                     debugMessage("Gap Seconds: " + gapSeconds);
@@ -415,10 +428,12 @@
                     carLengthsSpan.style.display = 'none';
                     carLengthsDiv.style.display = 'none';
                     carLengthsSpan.innerHTML = '';
-                    if (accelCount > 4 && currentSpeed >= (speedLimit / 2.0)) {
+                    if (accelCount > 4 && currentSpeed >= 20.0) {
                       debugMessage("leaving congestion");
-                      accelCount = 0;
-                      advisory = "You appear to be leaving the congested area. Please do not accelerate quickly and do not exceed the spped limit.";
+                      if (currentSpeed >= speedLimit) {
+                        accelCount = 0;
+                      }
+                      advisory = "You appear to be leaving the congested area. Please do not accelerate quickly and do not exceed the speed limit.";
                     } else {
                       advisory = "No congestion detected: Do not exceed the speed limit to ensure you don't cause congestion.";
                     }
@@ -495,7 +510,7 @@
         // Hide/show appropriate elements
         InputElements.style.display = 'none';
         locationError.style.display = 'block';
-        resultsTitle.style.display = 'none';
+        resultsTitle.style.display = 'block';
         resultsContent.style.display = 'none';
         addressContent.style.display = 'none';
         googleMap.style.display = 'none';
