@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
-    <div class="smalltext">v0.1064</div>
+    <div class="smalltext">v0.1065</div>
     <br/>
     <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
@@ -397,7 +397,7 @@
                     debugMessage('accelCount reset');
                 }
                 lastSpeed = currentSpeed;
-                if (currentSpeed != 0 && currentSpeed < 20.0) {
+                if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
                     debugMessage("jam detected");
                     gapSeconds = carLengthsToSeconds(carLengths, currentSpeed);
                     debugMessage("Gap Seconds: " + gapSeconds);
@@ -427,7 +427,7 @@
                     carLengthsSpan.style.display = 'none';
                     carLengthsDiv.style.display = 'none';
                     carLengthsSpan.innerHTML = '';
-                    if (accelCount > 4 && currentSpeed >= 20.0) {
+                    if (accelCount > 4 && currentSpeed >= (speedLimit / 2.0)) {
                       debugMessage("leaving congestion");
                       if (currentSpeed >= speedLimit) {
                         accelCount = 0;
