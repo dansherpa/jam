@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
-    <div class="smalltext">v0.1062</div>
+    <div class="smalltext">v0.1063</div>
     <br/>
     <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
@@ -218,17 +218,15 @@
         // Set index tracking variable to selected mountain data array index
         mountainDataIndex = mountainIndex;
         // Clear position watch
-        var timeout = setTimeout( function() { navigator.geolocation.clearWatch( watchPositionId ); }, 5000 );
+        navigator.geolocation.clearWatch(watchPositionId);
 
         // Start watching location
         if (started) {
-          var options = null;
-          if (isChrome) {
-            options = {enableHighAccuracy: highacc, maximumAge: 15000, timeout: 30000};
-          } else {
-            options = {enableHighAccuracy: highacc, maximumAge: Infinity, timeout: 0};
-          }
-          watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, options);
+          watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, {
+            enableHighAccuracy: highacc,
+            maximumAge: 0,
+            timeout: 30000
+          });
         } else {
           watchPositionId = undefined;
         }
