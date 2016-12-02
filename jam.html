@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
-    <div class="smalltext">v0.1058</div>
+    <div class="smalltext">v0.1059</div>
     <br/>
     <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
@@ -379,7 +379,10 @@
                 debugMessage("speed set");
                 if (currentSpeed > (lastSpeed * 1.1)) {
                   accelCount = accelCount + 1;
+                } else if (currentSpeed < lastSpeed) {
+                    accelCount = 0;
                 }
+                currentSpeed = 20;
                 lastSpeed = currentSpeed;
                 if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
                     debugMessage("jam detected");
@@ -391,14 +394,14 @@
                     // suggest new speed
                     //advisory = "Congestion detected: Suggested Speed: " + Math.round(getRandomArbitrary(currentSpeed * 0.5, currentSpeed * 0.9)) + " miles per hour";
                     advisory = "Congestion detected: Maintain a distance of " + carLengths + " car lengths behind the vehicle in front of you. ";
+                    carLengthsSpan.innerHTML = 'Distance: ' + carLengths + " car lengths (" + roundedGapSeconds + ' seconds)';
                     if (verbalize && (advisory != lastAdvisory)) {
                         debugMessage("verbalizing congestion advisory");
                         document.body.style.backgroundColor = "red";
                         carLengthsSpan.style.display = 'block';
                         carLengthsDiv.style.display = 'block';
-                        carLengthsSpan.innerHTML = 'Distance: ' + carLengths + " car lengths (" + roundedGapSeconds + ' seconds)';
                         lastAdvisory = advisory;
-                        advisory = advisory + "At your current speed of " + Math.round(currentSpeed) + " that equates to " + roundedGapSeconds + " seconds.";
+                        advisory = advisory + "At your current speed of " + Math.round(currentSpeed) + " miles per hour that equates to " + roundedGapSeconds + " seconds.";
                         var msg = new SpeechSynthesisUtterance(advisory);
                         window.speechSynthesis.speak(msg);
                         debugMessage("verbalized congestion advisory");
@@ -411,7 +414,7 @@
                     carLengthsSpan.style.display = 'none';
                     carLengthsDiv.style.display = 'none';
                     carLengthsSpan.innerHTML = '';
-                    if (accelCount > 4 && currentSpeed >= (speedLimit * 0.9)) {
+                    if (accelCount > 4 && currentSpeed >= (speedLimit / 2.0)) {
                       debugMessage("leaving congestion");
                       accelCount = 0;
                       advisory = "You appear to be leaving the congested area. Please do not accelerate quickly and do not exceed the spped limit.";
@@ -444,12 +447,15 @@
     }
 
     function mphToFps(mph) {
-      return 1.466666667 * mph;
+      return 1.466666667 * parseFloat(mph);
     }
 
     function carLengthsToSeconds(lengths, mph) {
-      fps = mphToFps(mph);
-      ft = (lengths + 1) * 14.766666667;
+      fps = mphToFps(parseFloat(mph));
+      debugMessage(mph + " mph = " + fps + " fps");
+      realLengths = parseInt(lengths) + 1;
+      ft = realLengths * 14.766666667;
+      debugMessage(lengths + " lengths (well really " + realLengths + ") = " + ft + " feet");
       return ft / fps;
     }
 
