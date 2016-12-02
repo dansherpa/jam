@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
-    <div class="smalltext">v0.1059</div>
+    <div class="smalltext">v0.1060</div>
     <br/>
     <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
@@ -374,13 +374,15 @@
                 var speedLimit = 65;
                 interstate = "You are on an Interstate (well, not really maybe, but we're testing)! Drive carefully...";
 
-                debugMessage("setting speed to " + Math.round(currentSpeed));
+                debugMessage("currentSpeed: " + currentSpeed + ", lastSpeed:" + lastSpeed + ", accelCount: " + accelCount);
                 speedSpan.innerHTML = "Current Speed: " + Math.round(currentSpeed) + " mph";
                 debugMessage("speed set");
-                if (currentSpeed > (lastSpeed * 1.1)) {
+                if (currentSpeed >= (lastSpeed * 1.1)) {
                   accelCount = accelCount + 1;
+                  debugMessage('accelCount++ = ' + accelCount);
                 } else if (currentSpeed < lastSpeed) {
                     accelCount = 0;
+                    debugMessage('accelCount reset');
                 }
                 lastSpeed = currentSpeed;
                 if (currentSpeed != 0 && currentSpeed < (speedLimit / 2.0)) {
