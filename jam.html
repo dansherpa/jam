@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext onclick="showDebug();">Jam Tracker</h2>
-    <div class="smalltext">v0.1063</div>
+    <div class="smalltext">v0.1064</div>
     <br/>
     <input type="button" onclick="startTracking(0)" value="Start" name="StartStop" id="StartStop"/>
   </div>
@@ -19,7 +19,7 @@
   <div id="MountainClimberTrackerInputElements">
     <div id="InputElementIndent" style="padding-left:10px; text-align: left">
       <br/><br/><label for="highaccuracyCheckbox" class=bigtext>High Accuracy:</label>
-      <input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox" />
+      <input class="highaccuracyCheckbox" type="checkbox" value="1" name="highaccuracyCheckbox" id="highaccuracyCheckbox" checked="true" />
 
       <br/><br/><label for="verbalizeCheckbox" class=bigtext>Verbalize Advice:</label>
       <input class="verbalizeCheckbox" type="checkbox" value="1" name="verbalizeCheckbox" id="verbalizeCheckbox" checked="true" />
@@ -111,7 +111,7 @@
     var addressUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
     var myAddress = '';
     var added = 0;
-    var highacc = false;
+    var highacc = true;
     var verbalize = true;
     var appendDebug = true;
     var alwaysHighway = true;
@@ -220,11 +220,12 @@
         // Clear position watch
         navigator.geolocation.clearWatch(watchPositionId);
 
+        debugMessage('highAcc: ' + highacc);
         // Start watching location
         if (started) {
           watchPositionId = navigator.geolocation.watchPosition(showClimberLocation, showError, {
             enableHighAccuracy: highacc,
-            maximumAge: 0,
+            maximumAge: 10000,
             timeout: 30000
           });
         } else {
