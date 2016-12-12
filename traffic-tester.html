@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2006</div>
+    <div class="smalltext">v0.2007</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -28,9 +28,9 @@
         <textarea name="FeedbackText" id="FeedbackText"></textarea>
         <input type="button" onclick="submitFeedback()" value="Submit" name="SubmitFeedback" id="SubmitFeedback"/>
     </div>
-    <!--audio autoplay id="IntroAudio" name="IntroAudio">
+    <audio autoplay id="IntroAudio" name="IntroAudio" preload="auto">
         <source src="Intro.mp3" type="audio/mpeg">
-    </audio-->
+    </audio>
   </div>
 
   <div id="BigDisplay">
@@ -51,7 +51,7 @@
     var startStopButton = document.getElementById("StartStop");
     var feedbackDiv = document.getElementById("FeedbackDiv");
     var feedbackText = document.getElementById("FeedbackText");
-    //var introAudio = document.getElementById("IntroAudio");
+    var introAudio = document.getElementById("IntroAudio");
 
     var timesCrawling = 0;
     var speedTotal = 0;
@@ -98,7 +98,8 @@
             adviceText.innerHTML = '<em>We cannot show your location because your browser does not support HTML 5 geolocation.<\/em>';
         }
         debugMessage('checked geo support');
-        setTimeout(playAudio('Intro.mp3'), 5000);
+        //setTimeout(playAudio('Intro.mp3'), 5000);
+        introAudio.play();  
         debugMessage('intro audio queued in 5 secs');
     }
 
