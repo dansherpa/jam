@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2004</div>
+    <div class="smalltext">v0.2005</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -28,6 +28,9 @@
         <textarea name="FeedbackText" id="FeedbackText"></textarea>
         <input type="button" onclick="submitFeedback()" value="Submit" name="SubmitFeedback" id="SubmitFeedback"/>
     </div>
+    <audio autoplay id="IntroAudio" name="IntroAudio">
+        <source src="Intro.mp3" type="audio/mpeg">
+    </audio>
   </div>
 
   <div id="BigDisplay">
@@ -48,6 +51,7 @@
     var startStopButton = document.getElementById("StartStop");
     var feedbackDiv = document.getElementById("FeedbackDiv");
     var feedbackText = document.getElementById("FeedbackText");
+    var introAudio = document.getElementById("IntroAudio");
 
     var timesCrawling = 0;
     var speedTotal = 0;
@@ -92,7 +96,7 @@
             buttonsDiv.style.display = 'none';
             adviceText.innerHTML = '<em>We cannot show your location because your browser does not support HTML 5 geolocation.<\/em>';
         }
-        playAudio('Intro.mp3');
+        //playAudio('Intro.mp3');
     }
 
     function isMobileBrowser() {
@@ -193,7 +197,7 @@
             return;
         }
 
-        debugMessage("processing results");
+        debugMessage("speed = " + currentSpeed);
 
         speedTotal = speedTotal + currentSpeed;
         speedCount = speedCount + 1;
@@ -201,7 +205,7 @@
         if (currentSpeed < 45) {
             debugMessage('below 45');
             if (!below45Already) {
-                debugText('first time below 45');
+                debugMessage('first time below 45');
                 trafficStartTime = now;
                 below45Already = true;
                 playAudio('Carspace.mp3');
@@ -241,7 +245,7 @@
 
     function debugMessage(m) {
       var d = new Date();
-      debugText = debugText + '\n' + d.toLocaleString('en-US', { hour12: false, timeZone: "UTC"}) + "." + pad((d.getMilliseconds() % 1000), 3) + ": " + m;
+      debugText = debugText + d.toLocaleString('en-US', { hour12: false, timeZone: "UTC"}) + "." + pad((d.getMilliseconds() % 1000), 3) + ": " + m + '\n';
       console.log(m);
     }
 
@@ -289,13 +293,22 @@
     var currentAudio;
 
     function playAudio(file) {
-        debugMessage('playing ' + file);
+        debugMessage('staging ' + file);
         if (currentAudio) {
+            debugMessage('pausing last audio');
             currentAudio.pause();
+            debugMessage('paused last audio');
         }
+        if (introAudio) {
+            debugMessage('pausing intro audio');
+            introAudio.pause();
+            debugMessage('paused intro audio');
+        }
+        debugMessage('playing ' + file);
         var audio = new Audio(file);
         currentAudio = audio;
         audio.play();
+        debugMessage('played ' + file);
     }
 
     // Handle all error messages and display appropriate elements
