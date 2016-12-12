@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2011</div>
+    <div class="smalltext">v0.2012</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -300,10 +300,12 @@
     function submitFeedback() {
         //alert('Debug: ' + debugText + '\n\n' + FeedbackText.value);
         FeedbackText.value = '';
-        debugText = '';
+        //debugText = '';
         adviceText.innerHTML = '';
         buttonsDiv.style.display = 'block';
         feedbackDiv.style.display = 'none';
+        window.open('mailto:tfx-feedback@sendprobe.com?subject=' + lastUpdateTime.toLocaleString() + '&body=' + debugText);
+        debugText = '';
     }
 
     function testAudio() {
@@ -359,9 +361,9 @@
 /* ]]> */
   </script>
 
-  <script type="text/javascript"
+  <!--script type="text/javascript"
       src="http://maps.googleapis.com/maps/api/js?sensor=true">
   </script>
-  <script type="text/javascript" src="geomock.js"></script>
+  <script type="text/javascript" src="geomock.js"></script-->
 </body>
 </html>
