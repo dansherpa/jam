@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2003</div>
+    <div class="smalltext">v0.2004</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -113,6 +113,7 @@
           stopTime = new Date();
           started = false;
           StartStop.value = "Enter Highway";
+          feedbackText.value = debugText;
           feedbackDiv.style.display = 'block';
           buttonsDiv.style.display = 'none';
           adviceText.innerHTML = getTripSummary();
@@ -198,7 +199,9 @@
         speedCount = speedCount + 1;
 
         if (currentSpeed < 45) {
+            debugMessage('below 45');
             if (!below45Already) {
+                debugText('first time below 45');
                 trafficStartTime = now;
                 below45Already = true;
                 playAudio('Carspace.mp3');
@@ -286,6 +289,7 @@
     var currentAudio;
 
     function playAudio(file) {
+        debugMessage('playing ' + file);
         if (currentAudio) {
             currentAudio.pause();
         }
