@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2005</div>
+    <div class="smalltext">v0.2006</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -28,9 +28,9 @@
         <textarea name="FeedbackText" id="FeedbackText"></textarea>
         <input type="button" onclick="submitFeedback()" value="Submit" name="SubmitFeedback" id="SubmitFeedback"/>
     </div>
-    <audio autoplay id="IntroAudio" name="IntroAudio">
+    <!--audio autoplay id="IntroAudio" name="IntroAudio">
         <source src="Intro.mp3" type="audio/mpeg">
-    </audio>
+    </audio-->
   </div>
 
   <div id="BigDisplay">
@@ -51,7 +51,7 @@
     var startStopButton = document.getElementById("StartStop");
     var feedbackDiv = document.getElementById("FeedbackDiv");
     var feedbackText = document.getElementById("FeedbackText");
-    var introAudio = document.getElementById("IntroAudio");
+    //var introAudio = document.getElementById("IntroAudio");
 
     var timesCrawling = 0;
     var speedTotal = 0;
@@ -85,6 +85,7 @@
 
     // Function to determine if browser supports geolocation
     function checkGeolocationSupport() {
+        debugMessage('checking geo support')
         feedbackDiv.style.display = 'none';
         if (navigator.geolocation) {
             buttonsDiv.style.display = 'block';
@@ -96,7 +97,9 @@
             buttonsDiv.style.display = 'none';
             adviceText.innerHTML = '<em>We cannot show your location because your browser does not support HTML 5 geolocation.<\/em>';
         }
-        //playAudio('Intro.mp3');
+        debugMessage('checked geo support');
+        setTimeout(playAudio('Intro.mp3'), 5000);
+        debugMessage('intro audio queued in 5 secs');
     }
 
     function isMobileBrowser() {
@@ -299,11 +302,11 @@
             currentAudio.pause();
             debugMessage('paused last audio');
         }
-        if (introAudio) {
-            debugMessage('pausing intro audio');
-            introAudio.pause();
-            debugMessage('paused intro audio');
-        }
+        //if (introAudio) {
+        //    debugMessage('pausing intro audio');
+        //    introAudio.pause();
+        //    debugMessage('paused intro audio');
+        //}
         debugMessage('playing ' + file);
         var audio = new Audio(file);
         currentAudio = audio;
