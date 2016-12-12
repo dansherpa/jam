@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2009</div>
+    <div class="smalltext">v0.2011</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -100,8 +100,12 @@
         }
         debugMessage('checked geo support');
         //setTimeout(playAudio('Intro.mp3'), 5000);
-        introAudio.play();  
-        debugMessage('intro audio queued in 5 secs');
+        if (isChrome) {
+            say("Introduction.");
+        } else {
+            introAudio.play();
+        }
+        debugMessage('intro audio queued');
     }
 
     function isMobileBrowser() {
@@ -203,7 +207,7 @@
         }
 
         debugMessage("speed = " + currentSpeed);
-        dotsCount = ((dotsCount + 1) % 3) + 1;
+        dotsCount = ((dotsCount) % 3) + 1;
 
         speedTotal = speedTotal + currentSpeed;
         speedCount = speedCount + 1;
@@ -214,18 +218,26 @@
                 debugMessage('first time below 45');
                 trafficStartTime = now;
                 below45Already = true;
-                playAudio('Carspace.mp3');
                 adviceText.innerHTML = 'Maintain at least 5 car lengths behind the vehicle in front of you.';
+                if (isChrome) {
+                    say("Maintain at least 5 car lengths behind the vehicle in front of you.");
+                } else {
+                    playAudio('Carspace.mp3');
+                }
                 //say("Maintain at least 5 car lengths behind the vehicle in front of you.");
             }
             if ((now - trafficStartTime) > (60*1000*5)) { // 5 minutes
-                playAudio('Stayinlane.mp3');
                 adviceText.innerHTML = 'Be sure to stay in your lane.';
+                if (isChrome) {
+                    say("Be sure to stay in your lane.");
+                } else {
+                    playAudio('Stayinlane.mp3');
+                }
                 //say("Stay in your lane");
             }
             escapedFromTraffic = false;
         }
-        adviceText.innerHTML = adviceText.innerHTML + ".".repeat(dotsCount);
+        adviceText.innerHTML = (adviceText.innerHTML).replace(/\.+$/, "") + ".".repeat(dotsCount);
 
         if (currentSpeed <= 2) {
             timesCrawling = timesCrawling + 1;
@@ -239,8 +251,12 @@
 
         if (!escapedFromTraffic && repeatedAccelCount == 5 && currentSpeed >= 45) {
             // just left traffic, accelerated 5 times in a row and speed >= 45
-            playAudio('Speedlimit.mp3');
             adviceText.innerHTML = 'Exiting congestion. Be sure to maintain a speed below the speed limit.';
+            if (isChrome) {
+                say("Exiting congestion. Be sure to maintain a speed below the speed limit.");
+            } else {
+                playAudio('Speedlimit.mp3');
+            }
             //say("Exiting congestion. Be sure to maintain a speed below the speed limit.");
             below45Already = false;
             trafficStartTime = 0;
@@ -296,6 +312,7 @@
     }
 
     function say(something) {
+        debugMessage("saying: " + something);
         var msg = new SpeechSynthesisUtterance(something);
         window.speechSynthesis.speak(msg);
     }
@@ -342,9 +359,9 @@
 /* ]]> */
   </script>
 
-  <!--script type="text/javascript"
+  <script type="text/javascript"
       src="http://maps.googleapis.com/maps/api/js?sensor=true">
   </script>
-  <script type="text/javascript" src="geomock.js"></script-->
+  <script type="text/javascript" src="geomock.js"></script>
 </body>
 </html>
