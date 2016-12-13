@@ -30,8 +30,9 @@ input[type=xbutton] {font-size: 12px; width:50%; height:10%; background-color: w
 input[type=button] {
     -webkit-appearance: none;
     font-size: 12px;
-    width: 50%;
-    height: 10%;
+    width: 20em;
+    height: 2em;
+    border: none;
 }
 
 textarea
