@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2015</div>
+    <div class="smalltext">v0.2016</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -307,7 +307,7 @@
         adviceText.innerHTML = '';
         buttonsDiv.style.display = 'block';
         feedbackDiv.style.display = 'none';
-        window.open('mailto:tfx-feedback@sendprobe.com?subject=' + lastUpdateTime.toLocaleString() + '&body=' + debugText);
+        //window.open('mailto:tfx-feedback@sendprobe.com?subject=' + lastUpdateTime.toLocaleString() + '&body=' + debugText);
         debugText = '';
     }
 
