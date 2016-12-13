@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2019</div>
+    <div class="smalltext">v0.2020</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -66,6 +66,7 @@
     var startTime = 0;
     var stopTime = 0;
     var trafficStartTime = 0;
+    var stayInLanePlayed = false;
 
     var added = 0;
     var highacc = true;
@@ -132,6 +133,7 @@
           buttonsDiv.style.display = 'none';
           adviceText.innerHTML = getTripSummary();
         } else {
+          stayInLanePlayed = false;
           introAudio.volume=0.0;
           introAudio.play();
           debugMessage("Start pressed.")
@@ -229,7 +231,8 @@
  //               }
                 //say("Maintain at least 5 car lengths behind the vehicle in front of you.");
             }
-            if ((now - trafficStartTime) > (60*1000*5)) { // 5 minutes
+            if (!stayInLanePlayed && ((now - trafficStartTime) > (60*1000*5))) { // 5 minutes
+                stayInLanePlayed = true;
                 adviceText.innerHTML = 'Be sure to stay in your lane.';
 //                if (isChrome) {
 //                    say("Be sure to stay in your lane.");
@@ -247,7 +250,13 @@
         }
 
         if (currentSpeed > lastSpeed) {
-            repeatedAccelCount = repeatedAccelCount + 1;
+            if (repeatedAccelCount == 0) {
+                if (currentSpeed < 45) {
+                    repeatedAccelCount = 1;
+                } 
+            } else {
+                repeatedAccelCount = repeatedAccelCount + 1;
+            }
         } else {
             repeatedAccelCount = 0;
         }
