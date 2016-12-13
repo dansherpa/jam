@@ -26,7 +26,7 @@ input[type='foocheckbox']:checked {
 
 input[type=checkbox] {width:30px; height:30px;}
 input[type=range] {width:100%; height:100%;}
-input[type=button] {font-size: 18px; width:50%; height:100%;}
+input[type=button] {font-size: 18px; width:50%;height:30px;}
 
 textarea
 {
