@@ -11,7 +11,7 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2012</div>
+    <div class="smalltext">v0.2013</div>
     <br/>
     <div id="ButtonsDiv">
         <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
@@ -28,8 +28,8 @@
         <textarea name="FeedbackText" id="FeedbackText"></textarea>
         <input type="button" onclick="submitFeedback()" value="Submit" name="SubmitFeedback" id="SubmitFeedback"/>
     </div>
-    <audio autoplay id="IntroAudio" name="IntroAudio" preload="auto">
-        <source src="Intro.mp3" type="audio/mpeg">
+    <audio id="IntroAudio" name="IntroAudio" preload="auto">
+        <source id="IntroAudioSrc" src="Intro.mp3" type="audio/mpeg">
     </audio>
   </div>
 
@@ -52,6 +52,7 @@
     var feedbackDiv = document.getElementById("FeedbackDiv");
     var feedbackText = document.getElementById("FeedbackText");
     var introAudio = document.getElementById("IntroAudio");
+    var introAudioSrc = document.getElementById("IntroAudioSrc");
 
     var timesCrawling = 0;
     var speedTotal = 0;
@@ -100,12 +101,12 @@
         }
         debugMessage('checked geo support');
         //setTimeout(playAudio('Intro.mp3'), 5000);
-        if (isChrome) {
-            say("Introduction.");
-        } else {
-            introAudio.play();
-        }
-        debugMessage('intro audio queued');
+//        if (isChrome) {
+//            say("Introduction.");
+//        } else {
+//            introAudio.play();
+//        }
+//        debugMessage('intro audio queued');
     }
 
     function isMobileBrowser() {
@@ -131,6 +132,8 @@
           buttonsDiv.style.display = 'none';
           adviceText.innerHTML = getTripSummary();
         } else {
+          introAudio.volume=0.0;
+          introAudio.play();
           debugMessage("Start pressed.")
           if (isMobileBrowser()) {
             debugMessage("mobile browser");
@@ -219,20 +222,20 @@
                 trafficStartTime = now;
                 below45Already = true;
                 adviceText.innerHTML = 'Maintain at least 5 car lengths behind the vehicle in front of you.';
-                if (isChrome) {
-                    say("Maintain at least 5 car lengths behind the vehicle in front of you.");
-                } else {
+ //               if (isChrome) {
+ //                   say("Maintain at least 5 car lengths behind the vehicle in front of you.");
+ //               } else {
                     playAudio('Carspace.mp3');
-                }
+ //               }
                 //say("Maintain at least 5 car lengths behind the vehicle in front of you.");
             }
             if ((now - trafficStartTime) > (60*1000*5)) { // 5 minutes
                 adviceText.innerHTML = 'Be sure to stay in your lane.';
-                if (isChrome) {
-                    say("Be sure to stay in your lane.");
-                } else {
+//                if (isChrome) {
+//                    say("Be sure to stay in your lane.");
+//                } else {
                     playAudio('Stayinlane.mp3');
-                }
+//                }
                 //say("Stay in your lane");
             }
             escapedFromTraffic = false;
@@ -252,11 +255,11 @@
         if (!escapedFromTraffic && repeatedAccelCount == 5 && currentSpeed >= 45) {
             // just left traffic, accelerated 5 times in a row and speed >= 45
             adviceText.innerHTML = 'Exiting congestion. Be sure to maintain a speed below the speed limit.';
-            if (isChrome) {
-                say("Exiting congestion. Be sure to maintain a speed below the speed limit.");
-            } else {
+//            if (isChrome) {
+//                say("Exiting congestion. Be sure to maintain a speed below the speed limit.");
+//            } else {
                 playAudio('Speedlimit.mp3');
-            }
+//            }
             //say("Exiting congestion. Be sure to maintain a speed below the speed limit.");
             below45Already = false;
             trafficStartTime = 0;
@@ -334,9 +337,13 @@
             debugMessage('paused intro audio');
         }
         debugMessage('playing ' + file);
-        var audio = new Audio(file);
-        currentAudio = audio;
-        audio.play();
+        //var audio = new Audio(file);
+        //currentAudio = audio;
+        //audio.play();
+        IntroAudioSrc.src = file;
+        introAudio.volume=1.0;
+        introAudio.load();
+        introAudio.play();
         debugMessage('played ' + file);
     }
 
@@ -361,9 +368,9 @@
 /* ]]> */
   </script>
 
-  <!--script type="text/javascript"
+  <script type="text/javascript"
       src="http://maps.googleapis.com/maps/api/js?sensor=true">
   </script>
-  <script type="text/javascript" src="geomock.js"></script-->
+  <script type="text/javascript" src="geomock.js"></script>
 </body>
 </html>
