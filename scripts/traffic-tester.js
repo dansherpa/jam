@@ -83,7 +83,8 @@
           sendAudioTriggers(2);
           stopTime = new Date();
           started = false;
-          StartStop.value = "Enter Highway";
+          StartStop.textContent = "Enter<br/>Highway";
+          //StartStop.value = "Enter Highway";
           //feedbackText.value = debugText;
           feedbackDiv.style.display = 'block';
           buttonsDiv.style.display = 'none';
@@ -112,7 +113,8 @@
           currentSpeed = 0;
           buttonsDiv.style.display = 'block';
           adviceText.innerHTML = "Playing advice via audio. Make sure audio is on."
-          StartStop.value = "Exit Highway";
+          StartStop.textContent = "Exit<br/>Highway";
+          //StartStop.value = "Exit Highway";
 
         }
 

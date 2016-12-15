@@ -12,12 +12,12 @@
 <body onload="checkGeolocationSupport()">
   <div id="ClimberTrackerHeader">
     <h2 class=bigtext>Traffic Tester (Alpha)</h2>
-    <div class="smalltext">v0.2036</div>
+    <div class="smalltext">v0.2037</div>
     <br/>
     <div id="ButtonsDiv">
-        <input type="button" onclick="startTracking()" value="Enter Highway" name="StartStop" id="StartStop"/>
-        <br/><br/><br/>
-        <input type="button" onclick="testAudio()" value="Test Audio" name="TestAudio" id="TestAudio"/> 
+        <button onclick="startTracking()" name="StartStop" id="StartStop">Enter</br>Highway</button>
+        <br/><br/>
+        <button onclick="testAudio()" name="TestAudio" id="TestAudio">Test<br/>Audio</button> 
         <br/>
     </div>
     <div id="AdviceDiv">
@@ -28,7 +28,7 @@
         <label for="FeedbackText" class=mediumtext>Feedback:</label><br/>
         <textarea name="FeedbackText" id="FeedbackText"></textarea>
         <br/><br/>
-        <input type="button" onclick="submitFeedback()" value="Submit" name="SubmitFeedback" id="SubmitFeedback"/>
+        <button onclick="submitFeedback()" name="SubmitFeedback" id="SubmitFeedback">Submit</button>
     </div>
     <audio id="IntroAudio" name="IntroAudio" preload="auto">
         <source id="IntroAudioSrc" src="audio/Intro.mp3" type="audio/mpeg">
