@@ -246,6 +246,8 @@
       var d = new Date();
       debugText = debugText + d.toLocaleString('en-US', { hour12: false, timeZone: "UTC"}) + "." + pad((d.getMilliseconds() % 1000), 3) + ": " + m + '\n';
       console.log(m);
+
+      sendDebugMessages(m);
     }
 
     function getTripSummary() {
@@ -380,6 +382,24 @@
             $.getJSON(
             {
                 url: '/services/DeviceTracking.svc/postAuditTriggers?sessionId=' + sessionId + '&intTypeId=' + typeId,
+                type: "GET",
+                success: function (data) {
+                    //alert('Thank-you for providing feedback!');
+                },
+                error: function (data) {
+                    alert(data);
+                }
+            });
+        }
+    }
+
+    function sendDebugMessages(description) {
+        if (document.location.hostname != "" && document.location.hostname != "rawgit.com") {
+            var sessionId = document.getElementById("lblSessionId").textContent;
+
+            $.getJSON(
+            {
+                url: '/services/DeviceTracking.svc/postDebugMessage?sessionId=' + sessionId + '&description=' + description,
                 type: "GET",
                 success: function (data) {
                     //alert('Thank-you for providing feedback!');
