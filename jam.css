@@ -13,7 +13,7 @@ h1{
 }
 
 input[type='foocheckbox'] {
-    -webkit-appearance:none;
+    -webkit-appearance:button;
     width:30px;
     height:30px;
     background:white;
