@@ -22,6 +22,7 @@
     var stopTime = 0;
     var trafficStartTime = 0;
     var stayInLanePlayed = false;
+    var lastPosition;
 
     var added = 0;
     var highacc = true;
@@ -168,8 +169,22 @@
             currentSpeed = (position.coords.speed * 2.2369362920544);
         } else {
             debugMessage("no speed recorded");
-            return;
+            if (!lastPosition) {
+                debugMessage("cannot calculate speed on first position report");
+                lastPosition = position;
+                return;
+            }
+            if (position.coords && position.coords.timestamp && position.coords.timestamp > 0 && position.coords.latitude && position.coords.longitude) {
+                debugMessage("calculating speed from distance/time");
+                lastSpeed = currentSpeed;
+                currentSpeed = calculateSpeed(lastPosition, position);
+            } else {
+                debugMessage("cannot calculate speed - not enough position info");
+                return;
+            }
         }
+
+        lastPosition = position;
 
         debugMessage("speed = " + currentSpeed);
         dotsCount = ((dotsCount) % 3) + 1;
@@ -272,6 +287,35 @@
         var minutes = Math.floor(seconds / 60);
         seconds = seconds - (minutes * 60);
         return minutes + " minute(s), " + seconds + " second(s)";
+    }
+
+    //fuction calculateSpeed(latitude1, longitude1, latitude2, longitude2, millis) {
+    function calculateSpeed(pos1, pos2) {
+        millis = pos2.timestamp - pos1.timestamp;
+        hours = millis / (1000.0 * 60.0 * 60.0);
+        debugMessage("millis: " + millis + ", hours: " + hours)
+        miles = calculateDistance(pos1.latitude, pos1.longitude, pos2.latitude, pos2.longitude);
+        speed = miles / hours;
+        debugMessage("millis: " + millis + ", hours: " + hours + ", miles: " + miles + ", speed: " + speed);
+        return speed;
+    }
+
+    function getGeoTimestampDate(timestamp) {
+        if (timestamp > 14000000000000) { timestamp = Math.floor(timestamp / 1000); }
+        return new Date(timestamp);
+    }
+
+    function calculateDistance(latitude1, longitude1, latitude2, longitude2) {
+
+        // Calculate distance between mountain peak and current location
+        // using the Haversine formula
+        var earthRadius = 3961.3; // Radius of the earth in miles
+        var dLatitude = convertToRadian(latitude2 - latitude1);
+        var dLongitude = convertToRadian(longitude2 - longitude1);
+        var a = Math.sin(dLatitude / 2) * Math.sin(dLatitude / 2) + Math.cos(convertToRadian(latitude1)) * Math.cos(convertToRadian(latitude2)) * Math.sin(dLongitude / 2) * Math.sin(dLongitude / 2);
+        var greatCircleDistance = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var distance = earthRadius * greatCircleDistance; // distance converted to miles from radians
+        return distance;
     }
 
     function submitFeedback() {
