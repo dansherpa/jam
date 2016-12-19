@@ -262,10 +262,11 @@
 
     function debugMessage(m) {
       var d = new Date();
-      debugText = debugText + d.toLocaleString('en-US', { hour12: false, timeZone: "UTC"}) + "." + pad((d.getMilliseconds() % 1000), 3) + ": " + m + '\n';
-      console.log(m);
+      var dm = d.toLocaleString('en-US', { hour12: false, timeZone: "UTC"}) + "." + pad((d.getMilliseconds() % 1000), 3);
+      debugText = debugText + dm + ": " + m + '\n';
+      console.log(dm + ": " + m);
 
-      sendDebugMessages(m);
+      sendDebugMessages(dm + ": " + m);
     }
 
     function getTripSummary() {
@@ -337,7 +338,7 @@
         //if (feedbackText.value == 'email') {
         //    window.open('mailto:dansherpa@gmail.com?subject=' + lastUpdateTime.toLocaleString() + '&body=' + debugText);
         //}
-        sendDebugMessages(debugText);
+        //sendDebugMessages(debugText);
         sendFeedback();
     }
 
