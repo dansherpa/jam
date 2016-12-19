@@ -163,7 +163,9 @@
         //position.coords.heading
         //position.coords.heading
         //position.coords.speed
-        
+        if (lastPosition && position.coords && position.timestamp && position.timestamp > 0 && position.coords.latitude && position.coords.longitude) {
+            calculatedSpeed = calculateSpeed(lastPosition, position);
+        }
         if (position.coords.speed) {
             lastSpeed = currentSpeed;
             currentSpeed = (position.coords.speed * 2.2369362920544);
@@ -176,7 +178,7 @@
             }
             if (position.coords && position.timestamp && position.timestamp > 0 && position.coords.latitude && position.coords.longitude) {
                 debugMessage("calculating speed from distance/time");
-                currentSpeed = calculateSpeed(lastPosition, position);
+                currentSpeed = calculatedSpeed;
                 debugMessage("speed calculated at: " + currentSpeed + " mph");
                 lastSpeed = currentSpeed;
             } else {
@@ -275,6 +277,7 @@
         if (speedCount > 0) {
             avgSpeed = speedTotal/speedCount;
         }
+        avgSpeed = totalMiles / totalHours;
         var summary = "";
 
         summary = '<em>Trip Summary</em><br/><br/>';
@@ -296,6 +299,8 @@
         return numericDegree * Math.PI / 180;
     }
 
+    var totalMiles = 0;
+    var totalHours = 0;
     function calculateSpeed(pos1, pos2) {
         var millis = pos2.timestamp - pos1.timestamp;
         debugMessage("millis: " + millis);
@@ -306,8 +311,10 @@
         }
         var hours = millis / (1000.0 * 60.0 * 60.0);
         debugMessage("hours: " + hours);
+        totalHours = totalHours + hours;
         var miles = calculateDistance(pos1.coords.latitude, pos1.coords.longitude, pos2.coords.latitude, pos2.coords.longitude);
         debugMessage("miles: " + miles);
+        totalMiles = totalMiles + miles;
         var speed = miles / hours;
         debugMessage("Calculated millis: " + millis + ", hours: " + hours + ", miles: " + miles + ", speed: " + speed);
         return speed;
