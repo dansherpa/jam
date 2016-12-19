@@ -292,17 +292,23 @@
     //fuction calculateSpeed(latitude1, longitude1, latitude2, longitude2, millis) {
     function calculateSpeed(pos1, pos2) {
         millis = pos2.timestamp - pos1.timestamp;
+        if (pos1.timestamp > 14000000000000) {
+            // microseconds
+            millis = Math.floor(millis / 1000);
+        }
         hours = millis / (1000.0 * 60.0 * 60.0);
-        debugMessage("millis: " + millis + ", hours: " + hours)
         miles = calculateDistance(pos1.coords.latitude, pos1.coords.longitude, pos2.coords.latitude, pos2.coords.longitude);
         speed = miles / hours;
-        debugMessage("millis: " + millis + ", hours: " + hours + ", miles: " + miles + ", speed: " + speed);
+        debugMessage("Calculated millis: " + millis + ", hours: " + hours + ", miles: " + miles + ", speed: " + speed);
         return speed;
     }
 
-    function getGeoTimestampDate(timestamp) {
-        if (timestamp > 14000000000000) { timestamp = Math.floor(timestamp / 1000); }
-        return new Date(timestamp);
+    function massageTimestamp(timestamp) {
+        if (timestamp > 14000000000000) {
+            return Math.floor(timestamp / 1000);
+        } else {
+            return timestamp;
+        }
     }
 
     function calculateDistance(latitude1, longitude1, latitude2, longitude2) {
