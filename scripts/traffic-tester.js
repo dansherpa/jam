@@ -177,7 +177,7 @@
             if (position.coords && position.timestamp && position.timestamp > 0 && position.coords.latitude && position.coords.longitude) {
                 debugMessage("calculating speed from distance/time");
                 currentSpeed = calculateSpeed(lastPosition, position);
-                debugMessage("spped calculated at: " + currentSpeed + " mph");
+                debugMessage("speed calculated at: " + currentSpeed + " mph");
                 lastSpeed = currentSpeed;
             } else {
                 debugMessage("cannot calculate speed - not enough position info");
@@ -334,6 +334,9 @@
     }
 
     function submitFeedback() {
+        if (feedbackText.value == 'email') {
+            window.open('mailto:dansherpa@gmail.com?subject=' + lastUpdateTime.toLocaleString() + '&body=' + debugText);
+        }
         sendFeedback();
     }
 
