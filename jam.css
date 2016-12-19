@@ -30,6 +30,7 @@ button {
     -webkit-appearance: button;
     background: white;
     border: none;
+    font-size: 18px;
 }
 
 textarea
