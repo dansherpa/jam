@@ -174,7 +174,7 @@
                 lastPosition = position;
                 return;
             }
-            if (position.coords && position.coords.timestamp && position.coords.timestamp > 0 && position.coords.latitude && position.coords.longitude) {
+            if (position.coords && position.timestamp && position.timestamp > 0 && position.coords.latitude && position.coords.longitude) {
                 debugMessage("calculating speed from distance/time");
                 lastSpeed = currentSpeed;
                 currentSpeed = calculateSpeed(lastPosition, position);
@@ -294,7 +294,7 @@
         millis = pos2.timestamp - pos1.timestamp;
         hours = millis / (1000.0 * 60.0 * 60.0);
         debugMessage("millis: " + millis + ", hours: " + hours)
-        miles = calculateDistance(pos1.latitude, pos1.longitude, pos2.latitude, pos2.longitude);
+        miles = calculateDistance(pos1.coords.latitude, pos1.coords.longitude, pos2.coords.latitude, pos2.coords.longitude);
         speed = miles / hours;
         debugMessage("millis: " + millis + ", hours: " + hours + ", miles: " + miles + ", speed: " + speed);
         return speed;
