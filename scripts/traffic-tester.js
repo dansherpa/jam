@@ -334,9 +334,10 @@
     }
 
     function submitFeedback() {
-        if (feedbackText.value == 'email') {
-            window.open('mailto:dansherpa@gmail.com?subject=' + lastUpdateTime.toLocaleString() + '&body=' + debugText);
-        }
+        //if (feedbackText.value == 'email') {
+        //    window.open('mailto:dansherpa@gmail.com?subject=' + lastUpdateTime.toLocaleString() + '&body=' + debugText);
+        //}
+        sendDebugMessages(debugText);
         sendFeedback();
     }
 
