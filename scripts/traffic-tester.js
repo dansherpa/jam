@@ -176,8 +176,9 @@
             }
             if (position.coords && position.timestamp && position.timestamp > 0 && position.coords.latitude && position.coords.longitude) {
                 debugMessage("calculating speed from distance/time");
-                lastSpeed = currentSpeed;
                 currentSpeed = calculateSpeed(lastPosition, position);
+                debugMessage("spped calculated at: " + currentSpeed + " mph");
+                lastSpeed = currentSpeed;
             } else {
                 debugMessage("cannot calculate speed - not enough position info");
                 return;
@@ -289,16 +290,24 @@
         return minutes + " minute(s), " + seconds + " second(s)";
     }
 
-    //fuction calculateSpeed(latitude1, longitude1, latitude2, longitude2, millis) {
+    // Function to convert degrees to radians
+    function convertToRadian(numericDegree) {
+        return numericDegree * Math.PI / 180;
+    }
+
     function calculateSpeed(pos1, pos2) {
-        millis = pos2.timestamp - pos1.timestamp;
+        var millis = pos2.timestamp - pos1.timestamp;
+        debugMessage("millis: " + millis);
         if (pos1.timestamp > 14000000000000) {
             // microseconds
+            debugMessage("adjusting millis");
             millis = Math.floor(millis / 1000);
         }
-        hours = millis / (1000.0 * 60.0 * 60.0);
-        miles = calculateDistance(pos1.coords.latitude, pos1.coords.longitude, pos2.coords.latitude, pos2.coords.longitude);
-        speed = miles / hours;
+        var hours = millis / (1000.0 * 60.0 * 60.0);
+        debugMessage("hours: " + hours);
+        var miles = calculateDistance(pos1.coords.latitude, pos1.coords.longitude, pos2.coords.latitude, pos2.coords.longitude);
+        debugMessage("miles: " + miles);
+        var speed = miles / hours;
         debugMessage("Calculated millis: " + millis + ", hours: " + hours + ", miles: " + miles + ", speed: " + speed);
         return speed;
     }
